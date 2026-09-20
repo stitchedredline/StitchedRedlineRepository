@@ -12,6 +12,15 @@
         "right"
       ],
       "units": []
+    },
+    {
+      "name": "2206",
+      "floors": 3,
+      "sides": [
+        "left",
+        "right"
+      ],
+      "units": []
     }
   ]
 }
