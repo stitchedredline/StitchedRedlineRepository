@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Affinity Route</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1 id="propName">Affinity Route</h1>
+      <div class="sub" id="syncLine">offline mode</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn sec sm" id="btnRefresh">Check scans</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="sLeft">0</b><span>doors left</span></div>
+    <div class="stat"><b id="sSaved">0</b><span>skipped</span></div>
+    <div class="stat"><b id="sBags">0</b><span>bags</span></div>
+    <div class="stat"><b id="sDone">0</b><span>picked up</span></div>
+  </div>
+
+  <div class="tabs" role="group" aria-label="Route mode">
+    <button data-mode="confirmed" aria-pressed="false">QR only</button>
+    <button data-mode="smart" aria-pressed="true">Smart</button>
+    <button data-mode="sweep" aria-pressed="false">Sweep all</button>
+  </div>
+
+  <div id="empty" class="card hide">
+    <b>No route set up yet.</b>
+    <p class="muted">Add your buildings and unit numbers once — it takes about
+      ten minutes and you never do it again.</p>
+    <a class="btn" href="setup.html">Set up my route</a>
+  </div>
+
+  <div id="nowCard" class="card now hide">
+    <div class="bldg" id="nowBldg">Building</div>
+    <div class="door" id="nowDoor">—</div>
+    <div class="why" id="nowWhy"></div>
+    <button class="btn" id="btnPicked">Picked it up</button>
+    <div class="row">
+      <button class="btn sec" id="btnEmpty">No trash</button>
+      <button class="btn sec" id="btnSkip">Skip for now</button>
+    </div>
+  </div>
+
+  <div id="dumpCard" class="card hide">
+    <b id="dumpMsg"></b>
+    <button class="btn warn" id="btnDump">Dumped at compactor</button>
+  </div>
+
+  <h2>Coming up</h2>
+  <ul class="list" id="upNext"></ul>
+
+  <h2>Buildings</h2>
+  <div id="bldgs"></div>
+
+  <h2>End of shift</h2>
+  <div class="card">
+    <p class="muted" id="shiftLine">Finish the route, then close out the night so the
+      app learns which doors actually put trash out.</p>
+    <button class="btn sec" id="btnClose">Close out tonight</button>
+  </div>
+
+  <p class="muted" style="margin-top:24px">
+    <a href="setup.html">Route setup</a> ·
+    <a href="qr.html">Print QR tags</a> ·
+    <a href="history.html">History</a>
+  </p>
+</div>
+
+<div class="bar">
+  <button class="btn sec" id="btnJump">Jump to door</button>
+  <button class="btn warn" id="btnCompactor">Compactor run</button>
+</div>
+
+<script src="js/route.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

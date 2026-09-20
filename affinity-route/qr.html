@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Print QR Tags</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="noprint">
+    <div class="top"><h1>QR door tags</h1><div class="spacer"></div>
+      <a class="btn sec sm" href="index.html">Back</a></div>
+
+    <div class="card">
+      <label for="base">Public address of this app</label>
+      <input id="base" placeholder="https://yourname.github.io/StitchedRedlineRepository/affinity-route/">
+      <label for="which">Which buildings</label>
+      <select id="which"></select>
+      <label for="headline">Line on the tag</label>
+      <input id="headline" value="TRASH OUT? SCAN ME">
+      <div class="row">
+        <button class="btn" id="btnGen">Build tags</button>
+        <button class="btn sec" id="btnPrint">Print</button>
+      </div>
+      <p class="muted">Print on sticker paper or cardstock, then tape one beside each
+        door. Do this on wifi — the QR builder needs to load once, then it is cached.</p>
+    </div>
+  </div>
+
+  <div class="tags" id="tags"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="js/route.js"></script>
+<script src="js/store.js"></script>
+<script src="config.js"></script>
+<script src="js/qr.js"></script>
+</body>
+</html>

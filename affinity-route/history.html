@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Route History</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>History</h1><div class="spacer"></div>
+    <a class="btn sec sm" href="index.html">Back</a></div>
+  <h2>Nights</h2>
+  <ul class="list" id="nights"></ul>
+  <h2>Doors most likely to have trash</h2>
+  <ul class="list" id="doors"></ul>
+  <h2>Doors you can usually skip</h2>
+  <ul class="list" id="skips"></ul>
+</div>
+<script src="js/route.js"></script>
+<script src="js/store.js"></script>
+<script>
+(function () {
+  var cfg = Store.cfg;
+  var nights = Store.log();
+  document.getElementById('nights').innerHTML = nights.length
+    ? nights.map(function (n) {
+        return '<li><span class="door">' + n.picked + '</span>' +
+          '<span class="meta">' + n.id + ' · ' + n.empty + ' empty · ' +
+          n.runs + ' runs · ' + n.minutes + ' min</span></li>';
+      }).join('')
+    : '<li class="muted">No closed nights yet.</li>';
+
+  var rows = Store.allUnits().map(function (x) {
+    var h = (cfg.history || {})[x.unit.id];
+    return {
+      label: x.building.name + ' · ' + x.unit.label,
+      rate: Route.hitRate(h),
+      nights: h ? h.nights : 0
+    };
+  }).filter(function (r) { return r.nights >= 3; });
+
+  function paint(el, list, empty) {
+    document.getElementById(el).innerHTML = list.length
+      ? list.map(function (r) {
+          return '<li><span class="door">' + Math.round(r.rate * 100) + '%</span>' +
+            '<span class="meta">' + r.label + ' · ' + r.nights + ' nights</span></li>';
+        }).join('')
+      : '<li class="muted">' + empty + '</li>';
+  }
+
+  paint('doors', rows.filter(function (r) { return r.rate >= .75; })
+    .sort(function (a, b) { return b.rate - a.rate; }).slice(0, 25),
+    'Not enough nights logged yet — close out a few shifts.');
+  paint('skips', rows.filter(function (r) { return r.rate <= .15; })
+    .sort(function (a, b) { return a.rate - b.rate; }).slice(0, 25),
+    'Nothing looks skippable yet.');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<title>My Trash Is Out</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap resident">
+  <div id="askView">
+    <div class="unit" id="unitLine">Apartment</div>
+    <div class="big" id="doorLine">—</div>
+    <button class="btn cta" id="btnOut">My trash is out</button>
+    <p class="muted" style="margin-top:18px">
+      Tap once when your bag is by the door. Your valet sees it right away
+      and will not knock on doors with nothing out.
+    </p>
+  </div>
+
+  <div id="doneView" class="hide">
+    <div class="done">✅</div>
+    <div class="big">Got it</div>
+    <p class="muted" id="doneLine">We'll grab it tonight.</p>
+    <button class="btn sec" id="btnAgain">Undo</button>
+  </div>
+
+  <div id="errView" class="hide">
+    <div class="big">Hmm</div>
+    <p class="muted" id="errLine"></p>
+    <button class="btn sec" id="btnRetry">Try again</button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var unit = q.get('u') || '';
+  var prop = q.get('p') || 'affinity1';
+  var api = q.get('api') || window.AFFINITY_API || '';
+  var label = unit.indexOf('.') > -1 ? unit.split('.').pop() : unit;
+
+  var $ = function (id) { return document.getElementById(id); };
+  $('doorLine').textContent = label || 'Unknown';
+  $('unitLine').textContent = 'Apartment';
+
+  function show(which) {
+    ['askView', 'doneView', 'errView'].forEach(function (v) {
+      $(v).classList.toggle('hide', v !== which);
+    });
+  }
+
+  /* Remember locally too, so a double tap doesn't send a second ping
+     and the resident sees the right state if they reopen the page. */
+  var memKey = 'affinity.out.' + unit;
+  function today() {
+    var d = new Date(Date.now() - 4 * 3600 * 1000);
+    return d.toISOString().slice(0, 10);
+  }
+  if (localStorage.getItem(memKey) === today()) show('doneView');
+
+  function send(action) {
+    if (!api) {
+      $('errLine').textContent = 'This tag is not connected yet. Let your valet know.';
+      return show('errView');
+    }
+    $('btnOut').textContent = 'Sending…';
+    $('btnOut').disabled = true;
+    fetch(api, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: action, p: prop, unit: unit, at: Date.now() })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res && res.ok) {
+        if (action === 'out') { localStorage.setItem(memKey, today()); show('doneView'); }
+        else { localStorage.removeItem(memKey); show('askView'); }
+      } else {
+        throw new Error('rejected');
+      }
+    }).catch(function () {
+      $('errLine').textContent = 'Could not reach the service. Check your signal and tap again.';
+      show('errView');
+    }).then(function () {
+      $('btnOut').textContent = 'My trash is out';
+      $('btnOut').disabled = false;
+    });
+  }
+
+  $('btnOut').onclick = function () { send('out'); };
+  $('btnAgain').onclick = function () { send('cancel'); };
+  $('btnRetry').onclick = function () { show('askView'); };
+})();
+</script>
+</body>
+</html>

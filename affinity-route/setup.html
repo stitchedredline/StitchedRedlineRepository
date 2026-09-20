@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<title>Route Setup</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Route setup</h1><div class="spacer"></div>
+    <a class="btn sec sm" href="index.html">Done</a></div>
+
+  <div class="card">
+    <label for="propName">Property name</label>
+    <input id="propName" placeholder="Affinity — Charlotte">
+    <label for="apiUrl">Apps Script web app URL (optional)</label>
+    <input id="apiUrl" placeholder="https://script.google.com/macros/s/..../exec">
+    <label for="bagCap">Bags you can carry per compactor run</label>
+    <input id="bagCap" type="number" min="1" max="60" value="12">
+    <button class="btn sec" id="btnSaveCfg">Save</button>
+  </div>
+
+  <h2>Buildings</h2>
+  <p class="muted">Add them in the order you actually walk them. Unit numbers accept
+    ranges: <code>101-108, 110, 201-208</code>.</p>
+  <div id="list"></div>
+
+  <div class="row">
+    <button class="btn" id="btnAdd">Add building</button>
+    <button class="btn sec" id="btnDemo">Load sample</button>
+  </div>
+
+  <h2>Optimize by GPS (optional)</h2>
+  <div class="card">
+    <p class="muted">Standing at the compactor, tap "Pin compactor". Then as you pass
+      each building tonight, tap its "Pin" button once. After every building has a pin,
+      the app can re-order the whole property by shortest walk.</p>
+    <div class="row">
+      <button class="btn sec" id="btnPinComp">Pin compactor</button>
+      <button class="btn sec" id="btnOptimize">Re-order by pins</button>
+    </div>
+    <p class="muted" id="pinLine"></p>
+  </div>
+
+  <h2>Backup</h2>
+  <div class="card">
+    <p class="muted">Your route lives on this phone. Copy this text somewhere safe
+      (email it to yourself) so you never rebuild it.</p>
+    <textarea id="dump" spellcheck="false"></textarea>
+    <div class="row">
+      <button class="btn sec" id="btnExport">Fill with my data</button>
+      <button class="btn sec" id="btnImport">Restore from text</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/route.js"></script>
+<script src="js/store.js"></script>
+<script src="config.js"></script>
+<script src="js/setup.js"></script>
+</body>
+</html>
