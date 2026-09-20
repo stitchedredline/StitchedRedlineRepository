@@ -3,6 +3,7 @@
   "propertyName": "Affinity - Charlotte",
   "propertyId": "affinity1",
   "bagCapacity": 83,
+  "bagLimitPerUnit": 3,
   "buildings": [
     {
       "name": "2202",
@@ -62,6 +63,19 @@
       "name": "1028",
       "note": "Hot sheet at 1028 — read it before you walk the building.",
       "_note": "floors and sides not confirmed yet; defaults to 3 floors, left and right. Walking order may need moving.",
+      "units": []
+    },
+    {
+      "name": "TBD 2",
+      "_note": "walked right after the first compactor run — number never called out. Unit 1318 is in here, bottom floor left. Rename this to the real number and the history follows.",
+      "floors": 3,
+      "sides": [
+        "left",
+        "right"
+      ],
+      "floorNotes": {
+        "right|3": "Cat lady — heavy litter bags."
+      },
       "units": []
     }
   ]

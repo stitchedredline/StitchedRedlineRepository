@@ -35,7 +35,13 @@
     "b-no-number-1|left|1": 0,
     "b-no-number-1|right|3": 4,
     "b-no-number-1|right|2": 2,
-    "b-no-number-1|right|1": 0
+    "b-no-number-1|right|1": 0,
+    "b-tbd-2|left|3": 4,
+    "b-tbd-2|left|2": 2,
+    "b-tbd-2|left|1": 6,
+    "b-tbd-2|right|3": 4,
+    "b-tbd-2|right|2": 0,
+    "b-tbd-2|right|1": 0
   },
   "walked": [
     "b-2202",
@@ -43,9 +49,28 @@
     "b-2212",
     "b-2215",
     "b-8102",
-    "b-no-number-1"
+    "b-no-number-1",
+    "b-tbd-2"
   ],
   "runs": [
-    { "bags": 83, "note": "first compactor run, truck full" }
-  ]
+    {
+      "bags": 83,
+      "note": "first compactor run, truck full"
+    }
+  ],
+  "_needsId": "b-tbd-2 is the building walked after the first compactor run — number not called out. Unit 1318 is in it, bottom floor left. Re-key this once the number is known.",
+  "overLimit": [
+    {
+      "unit": "1318",
+      "building": "b-tbd-2",
+      "side": "left",
+      "floor": 1,
+      "bags": 6,
+      "limit": 3,
+      "night": "2026-09-20"
+    }
+  ],
+  "floorNotes": {
+    "b-tbd-2|right|3": "Cat lady — top floor right."
+  }
 }

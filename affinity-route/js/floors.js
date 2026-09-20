@@ -60,6 +60,10 @@
     beep(ok ? 880 : 240, ok ? 90 : 220);
   }
 
+  function esc(t) {
+    return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   function floorName(f) {
     if (f === topFloor() && f !== 1) return 'Top floor';
     if (f === 1) return 'Bottom floor';
@@ -80,6 +84,18 @@
     if (viaVoice) say(bags === 0 ? floorName(f) + ' clear' : bags + ' on ' + floorName(f));
     render();
     return true;
+  }
+
+  /* A door over the posted limit. Written down where it happened, because the
+     property needs the unit number and the count, not a memory of it. */
+  function logOver(hit) {
+    var rec = Store.logOverLimit(building().id, side, Store.night.atFloor, hit.unit, hit.bags);
+    var n = Store.overLimitList().length;
+    feedback(true, 'Unit ' + hit.unit + ' · ' + hit.bags + ' bags',
+      (rec.limit ? 'over the ' + rec.limit + '-bag limit' : 'logged') +
+      ' · ' + n + ' flagged tonight');
+    say('unit ' + String(hit.unit).split('').join(' ') + ' over limit');
+    render();
   }
 
   function undoLast() {
@@ -116,9 +132,20 @@
       }
     }
 
+    /* An aside about one door rides along in the same breath as the counts:
+       "...six on the bottom floor, unit 1318 has six bags, too many."
+       Pull it out first so the floor parser never sees it, and log it after the
+       floors, when the current floor is the one that door is on. */
+    var over = null;
+    for (var o = 0; o < texts.length; o++) {
+      over = Route.parseOverLimit(texts[o]);
+      if (over) break;
+    }
+
     /* Try each alternative; take the first that yields a real floor+count. */
-    for (var a = 0; a < texts.length; a++) {
-      var events = Route.parseFloorCall(texts[a], topFloor());
+    var handled = false;
+    for (var a = 0; a < texts.length && !handled; a++) {
+      var events = Route.parseFloorCall(Route.stripUnitAside(texts[a]), topFloor());
       var applied = Route.applyFloorCall(events, { side: side, floor: Store.night.atFloor });
       if (applied.side && applied.side !== side && sides().indexOf(applied.side) > -1) {
         setSide(applied.side);
@@ -128,7 +155,8 @@
           if (e.side && sides().indexOf(e.side) > -1) side = e.side;
           log(e.floor, e.bags, true);
         });
-        return;
+        handled = true;
+        break;
       }
       /* Side-only call: "switch to the right side" */
       if (applied.side && applied.side !== Store.night.atSide) {
@@ -136,10 +164,12 @@
         feedback(true, side + ' side', 'switched sides');
         say(side + ' side');
         render();
-        return;
+        handled = true;
       }
     }
-    feedback(false, '?', 'heard "' + texts[0] + '"');
+
+    if (over) { logOver(over); handled = true; }
+    if (!handled) feedback(false, '?', 'heard "' + texts[0] + '"');
   }
 
   function startListening() {
@@ -250,8 +280,10 @@
       var row = document.createElement('div');
       row.className = 'floor' + (val === null ? '' : (val === 0 ? ' zero' : ' logged')) +
         (Store.night.atFloor === f ? ' current' : '');
+      var fnote = Store.floorNote(b, side, f);
       row.innerHTML =
         '<div class="fname">' + floorName(f) +
+          (fnote ? '<span class="fnote">' + esc(fnote) + '</span>' : '') +
           '<span class="fsub">' + (hist && hist.nights
             ? 'avg ' + (hist.bags / hist.nights).toFixed(1) + ' bags · empty ' +
               Math.round(hist.empties / hist.nights * 100) + '% of nights'
@@ -274,6 +306,15 @@
     $('advice').textContent = room > 2
       ? 'Room for about ' + room + ' more before a compactor run.'
       : 'That is a full load — dump before the next building.';
+
+    var flagged = Store.overLimitList();
+    $('overList').innerHTML = flagged.length
+      ? '<b>Over the limit tonight</b>' + flagged.map(function (r) {
+          return '<div class="overrow">Unit ' + esc(r.unit) + ' · ' + r.bags +
+            ' bags' + (r.limit ? ' (limit ' + r.limit + ')' : '') + '</div>';
+        }).join('')
+      : '';
+    $('overList').hidden = !flagged.length;
 
     var walked = Object.keys(Store.night.visited).length;
     $('shiftStat').textContent = walked + ' of ' + buildings.length +
@@ -320,8 +361,12 @@
     stopListening();
     if (!confirm('Close out tonight? Saves every floor count into history.')) return;
     var s = Store.closeNight();
+    var over = (s.overLimit || []).map(function (r) {
+      return '  Unit ' + r.unit + ' — ' + r.bags + ' bags';
+    }).join('\n');
     alert('Night closed. ' + s.floorBags + ' bags logged across ' +
-      s.buildingsWalked + ' buildings.');
+      s.buildingsWalked + ' buildings.' +
+      (over ? '\n\nOver the limit:\n' + over : ''));
     location.href = 'index.html';
   };
 

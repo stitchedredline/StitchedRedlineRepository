@@ -201,6 +201,76 @@
   var FLOOR_WORD = { floor: 1, floors: 1, flr: 1, level: 1, story: 1, storey: 1 };
   var ZERO_WORD = { none: 1, nothing: 1, empty: 1, nada: 1, clear: 1, zip: 1 };
   var BAG_WORD = { bag: 1, bags: 1, bagged: 1 };
+  /* Words that hold a phrase together. "Four ON THE top floor" is one thought,
+     so these must not break the count away from the floor it belongs to. */
+  var FILLER = {
+    on: 1, the: 1, a: 1, an: 1, in: 1, at: 1, for: 1, of: 1, to: 1, and: 1,
+    is: 1, are: 1, was: 1, has: 1, have: 1, had: 1, got: 1, there: 1, that: 1,
+    it: 1, then: 1, we: 1, i: 1, up: 1, from: 1
+  };
+
+  var UNIT_WORD = { unit: 1, apartment: 1, apt: 1, door: 1 };
+  var LIMIT_WORD = { limit: 1, max: 1, maximum: 1, allowed: 1, rule: 1 };
+
+  function unitAsideAt(tokens) {
+    for (var i = 0; i < tokens.length; i++) if (UNIT_WORD[tokens[i]]) return i;
+    return -1;
+  }
+
+  function tokenize(text) {
+    return String(text || '').toLowerCase()
+      .replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+  }
+
+  /* The floor counts and an aside about one door come out in a single breath:
+     "...six on the bottom floor, unit 1318 has six bags, too many."
+     Everything from "unit" on is the aside, so the floor parser never sees it
+     and never scores that second "six" as another floor. */
+  function stripUnitAside(text) {
+    var tokens = tokenize(text);
+    var at = unitAsideAt(tokens);
+    return at < 0 ? String(text || '') : tokens.slice(0, at).join(' ');
+  }
+
+  /* "unit 1318 has six bags" -> { unit: '1318', bags: 6 }
+     Residents have a posted bag limit, so a door over it is worth writing down
+     while you are standing in front of it. The number in "three bag limit" is
+     the rule, not what was put out, so it never becomes the count. */
+  function parseOverLimit(text) {
+    var tokens = tokenize(text);
+    var at = unitAsideAt(tokens);
+    if (at < 0) return null;
+
+    var rest = tokens.slice(at + 1);
+    var unit = null, used = 0;
+    if (/^\d{3,}$/.test(rest[0] || '')) {
+      unit = rest[0];
+      used = 1;
+    } else {
+      var lead = [];
+      for (var k = 0; k < rest.length; k++) {
+        var tk = rest[k];
+        if (/^\d+$/.test(tk) || WORDS.hasOwnProperty(tk) || tk === 'hundred') lead.push(tk);
+        else break;
+      }
+      var got = parseSpokenUnits(lead.join(' '));
+      if (got.length) { unit = got[0]; used = lead.length; }
+    }
+    if (!unit || unit.length < 3) return null;
+
+    var tail = rest.slice(used);
+    for (var j = 0; j < tail.length; j++) {
+      if (!BAG_WORD[tail[j]]) continue;
+      if (LIMIT_WORD[tail[j + 1]]) continue;
+      var prev = tail[j - 1];
+      if (prev === undefined || LIMIT_WORD[tail[j - 2]]) continue;
+      var v = /^\d+$/.test(prev) ? parseInt(prev, 10)
+            : (WORDS.hasOwnProperty(prev) ? WORDS[prev] : null);
+      if (v === null || String(v) === unit) continue;
+      return { unit: unit, bags: v };
+    }
+    return null;
+  }
 
   /* "Top floor, left side, third floor zero bags, second floor two bags,
       bottom floor three bags" -> an ordered list of what you just said.
@@ -212,8 +282,15 @@
 
     var events = [];
     var held = null;            // a number/top/bottom waiting for "floor" or "bags"
+    var pendingBags = null;     // a count spoken before its floor: "four on the top floor"
     var expectFloorNumber = false;
     var sawFloor = false;
+
+    /* A bare number already in hand, now followed by a floor word, was the bag
+       count all along — it gets attached once the floor resolves. */
+    function shelveCount() {
+      if (held && held.kind === 'num') pendingBags = held.v;
+    }
 
     function resolve(h) {
       if (!h) return null;
@@ -229,17 +306,26 @@
       }
       if (tok === 'side' || tok === 'stairwell' || tok === 'wing') return;
 
-      if (tok === 'top' || tok === 'upper') { held = { kind: 'top' }; return; }
+      if (tok === 'top' || tok === 'upper') { shelveCount(); held = { kind: 'top' }; return; }
       if (tok === 'bottom' || tok === 'ground' || tok === 'lower' || tok === 'lobby') {
-        held = { kind: 'bottom' }; return;
+        shelveCount(); held = { kind: 'bottom' }; return;
       }
 
-      if (ORDINALS.hasOwnProperty(tok)) { held = { kind: 'num', v: ORDINALS[tok] }; return; }
+      if (ORDINALS.hasOwnProperty(tok)) {
+        shelveCount();
+        held = { kind: 'num', v: ORDINALS[tok] };
+        return;
+      }
 
       if (FLOOR_WORD.hasOwnProperty(tok)) {
         if (held) {
           var f = resolve(held);
-          if (f !== null) { events.push({ type: 'floor', value: f }); sawFloor = true; }
+          if (f !== null) {
+            events.push({ type: 'floor', value: f });
+            sawFloor = true;
+            if (pendingBags !== null) events.push({ type: 'bags', value: pendingBags });
+          }
+          pendingBags = null;
           held = null;
         } else {
           expectFloorNumber = true;   // "floor three"
@@ -276,8 +362,11 @@
         return;
       }
 
+      if (FILLER[tok]) return;
+
       /* an unrelated word breaks the phrase */
       held = null;
+      pendingBags = null;
       expectFloorNumber = false;
     });
 
@@ -300,6 +389,15 @@
         out.push({ side: side, floor: floor, bags: ev.value });
       }
     });
+
+    /* "...six on the bottom floor, left side" — the side named at the end still
+       describes the whole stairwell you just walked. One side in the utterance
+       claims every count in it. Two or more means you switched mid-call, so the
+       positional reading stands. */
+    var named = events.filter(function (ev) { return ev.type === 'side'; });
+    if (named.length === 1) {
+      out.forEach(function (e) { e.side = named[0].value; });
+    }
     return { entries: out, side: side, floor: floor };
   }
 
@@ -418,6 +516,8 @@
   return {
     parseSpokenUnits: parseSpokenUnits,
     parseFloorCall: parseFloorCall,
+    parseOverLimit: parseOverLimit,
+    stripUnitAside: stripUnitAside,
     applyFloorCall: applyFloorCall,
     spokenCommand: spokenCommand,
     matchUnits: matchUnits,

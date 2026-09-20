@@ -118,6 +118,25 @@ ok('import keeps a building note', noted.note === 'Hot sheet at 1028.');
 ok('a building with no layout still defaults', Store.sidesOf(noted).join() === 'left,right' &&
    Store.floorsOf(noted).join() === '3,2,1');
 
+/* A floor note is a standing fact about the stairwell, so it has to survive
+   a reload of route.json the same way history does. */
+Store.importRoute([
+  { name: '1318 Test', floors: 3, sides: ['left', 'right'],
+    floorNotes: { 'right|3': 'Cat lady.' }, units: [] }
+]);
+var noteB = Store.cfg.buildings[0];
+ok('a floor note survives the import', Store.floorNote(noteB, 'right', 3) === 'Cat lady.');
+ok('other floors stay quiet', Store.floorNote(noteB, 'left', 3) === '');
+Store.setFloorNote(noteB.id, 'left', 1, 'Blocked door.');
+ok('a floor note can be set on the route',
+   Store.floorNote(Store.cfg.buildings[0], 'left', 1) === 'Blocked door.');
+
+/* Doors over the posted limit are the record a notice gets written from. */
+var rec = Store.logOverLimit(noteB.id, 'left', 1, '1318', 6);
+ok('an over-limit door is logged with its count', rec.unit === '1318' && rec.bags === 6);
+ok('it carries the limit that was in force', rec.limit === 3);
+ok('it is listed for the night', Store.overLimitList().length === 1);
+
 /* Rebuild the door route for the voice-matching checks below. */
 Store.importRoute(Store.parseRouteText('2202: 101-108, 201-208\n2206: 101-104\n2210: 301-304'));
 

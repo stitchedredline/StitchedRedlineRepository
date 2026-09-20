@@ -119,5 +119,55 @@ ok('a floor with no count logs nothing',
 ok('a side-only call still reports the side',
    callOut('right side', 3).side === 'right');
 
+/* ---- the count comes before the floor: "four on the top floor" ---- */
+
+var pre = callOut('four on the top floor, two on the second floor, six on the bottom floor', 3);
+ok('count-before-floor yields every floor', pre.entries.length === 3);
+ok('"four on the top floor" is 4 bags on floor 3',
+   pre.entries[0].floor === 3 && pre.entries[0].bags === 4);
+ok('"two on the second floor" is 2 bags on floor 2',
+   pre.entries[1].floor === 2 && pre.entries[1].bags === 2);
+ok('"six on the bottom floor" is 6 bags on floor 1',
+   pre.entries[2].floor === 1 && pre.entries[2].bags === 6);
+ok('filler words do not break the phrase',
+   callOut('we got four up on the top floor', 3).entries[0].bags === 4);
+ok('count-before-floor mixes with count-after-floor',
+   callOut('four on the top floor, second floor two bags', 3).entries
+     .map(function (e) { return e.bags; }).join() === '4,2');
+
+/* ---- a side named at the end still describes the whole call ---- */
+
+var late = callOut('four on the top floor, two on the second floor, ' +
+                   'six on the bottom floor, left side', 3, { side: 'right' });
+ok('a side named last claims every count in the breath',
+   late.entries.length === 3 && late.entries.every(function (e) { return e.side === 'left'; }));
+ok('two sides in one breath still split positionally',
+   callOut('left side top floor two bags, right side top floor five bags', 3)
+     .entries.map(function (e) { return e.side; }).join() === 'left,right');
+
+/* ---- an aside about one door, spoken in the same breath ---- */
+
+var aside = 'four on the top floor, two on the second floor, six on the bottom floor, ' +
+            'left side, unit 1318 has six bags, too many. We only have a three bag limit.';
+var over = Route.parseOverLimit(aside);
+ok('the door number is read out of the aside', over && over.unit === '1318');
+ok('the count is what was put out, not the limit', over && over.bags === 6);
+ok('a limit with no door named is a rule, not a report',
+   Route.parseOverLimit('we only have a three bag limit') === null);
+ok('the limit clause never overwrites the real count',
+   Route.parseOverLimit('unit 1318 has six bags. the limit is three bags').bags === 6);
+ok('a door number with no "unit" in front is not an aside',
+   Route.parseOverLimit('six on the bottom floor') === null);
+ok('spoken door numbers work too',
+   Route.parseOverLimit('apartment thirteen eighteen has six bags').unit === '1318');
+ok('a terse aside works', Route.parseOverLimit('unit 1318 six bags').bags === 6);
+
+var stripped = callOut(Route.stripUnitAside(aside), 3, { side: 'right' });
+ok('stripping the aside leaves the floor counts intact',
+   stripped.entries.map(function (e) { return e.bags; }).join() === '4,2,6');
+ok('the aside never becomes a phantom floor count', stripped.entries.length === 3);
+ok('the side from the aside call still lands',
+   stripped.entries.every(function (e) { return e.side === 'left'; }));
+
 console.log(fails ? '\n' + fails + ' FAILED' : '\nall good');
 process.exit(fails ? 1 : 0);

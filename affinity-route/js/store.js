@@ -12,6 +12,7 @@ var Store = (function () {
     propertyName: 'Affinity Route',
     apiUrl: '',
     bagCapacity: 12,
+    bagLimitPerUnit: 3,
     compactorPin: null,
     buildings: [],
     history: {}   // unitId -> { nights, out }
@@ -38,7 +39,7 @@ var Store = (function () {
   }
 
   function freshNight() {
-    return { id: nightId(), flags: {}, done: {}, bags: 0, runs: [],
+    return { id: nightId(), flags: {}, done: {}, bags: 0, runs: [], overLimit: [],
              startedAt: null, lastPull: 0, assumeOut: false, visited: {},
              atBuilding: null, floorBags: {}, atSide: 'left', atFloor: null };
   }
@@ -123,6 +124,7 @@ var Store = (function () {
         floors: b.floors || null,
         sides: (b.sides && b.sides.length) ? b.sides.slice() : null,
         note: b.note || '',
+        floorNotes: Object.assign({}, b.floorNotes || {}),
         pin: (cfg.buildings.filter(function (old) { return old.id === id; })[0] || {}).pin || null,
         units: (b.units || []).map(function (label, j) {
           return { id: id + '.' + label, label: String(label), order: j + 1, note: '', skip: false };
@@ -145,6 +147,7 @@ var Store = (function () {
         if (data.propertyName) cfg.propertyName = data.propertyName;
         if (data.propertyId) cfg.propertyId = data.propertyId;
         if (data.bagCapacity) cfg.bagCapacity = data.bagCapacity;
+        if (data.bagLimitPerUnit) cfg.bagLimitPerUnit = data.bagLimitPerUnit;
         if (!data.buildings || !data.buildings.length) throw new Error('route.json has no buildings');
         var n = importRoute(data.buildings);
         return { buildings: n, doors: allUnits().length };
@@ -250,6 +253,41 @@ var Store = (function () {
   function floorKey(buildingId, side, floor) {
     return buildingId + '|' + (side || '-') + '|' + floor;
   }
+
+  /* A standing fact about one floor of one stairwell — "top floor is the cat
+     lady", so the heavy litter bags are no surprise next week. */
+  function floorNote(building, side, floor) {
+    if (!building) return '';
+    return (building.floorNotes || {})[(side || '-') + '|' + floor] || '';
+  }
+
+  function setFloorNote(buildingId, side, floor, text) {
+    var b = (cfg.buildings || []).filter(function (x) { return x.id === buildingId; })[0];
+    if (!b) return false;
+    b.floorNotes = b.floorNotes || {};
+    var k = (side || '-') + '|' + floor;
+    if (text) b.floorNotes[k] = String(text);
+    else delete b.floorNotes[k];
+    saveCfg();
+    return true;
+  }
+
+  /* A door that put out more than the posted limit. This is the record a
+     notice to the resident gets written from, so it keeps the unit, where it
+     was, and what the limit was on the night. */
+  function logOverLimit(buildingId, side, floor, unit, bags) {
+    night.overLimit = night.overLimit || [];
+    var rec = { building: buildingId, side: side || null, floor: floor || null,
+                unit: String(unit), bags: bags | 0,
+                limit: cfg.bagLimitPerUnit || null, at: Date.now() };
+    night.overLimit.push(rec);
+    saveNight();
+    queue({ type: 'overlimit', building: buildingId, unit: rec.unit,
+            bags: rec.bags, limit: rec.limit, at: rec.at });
+    return rec;
+  }
+
+  function overLimitList() { return (night.overLimit || []).slice(); }
 
   function setFloorBags(buildingId, side, floor, bags) {
     var k = floorKey(buildingId, side, floor);
@@ -377,6 +415,7 @@ var Store = (function () {
       picked: Object.keys(night.done).filter(function (k) { return night.done[k].outcome === 'picked'; }).length,
       empty: Object.keys(night.done).filter(function (k) { return night.done[k].outcome === 'empty'; }).length,
       runs: night.runs.length,
+      overLimit: (night.overLimit || []).slice(),
       minutes: night.startedAt ? Math.round((Date.now() - night.startedAt) / 60000) : 0
     };
     var log = read('affinity.log.v1', []);
@@ -480,6 +519,10 @@ var Store = (function () {
     markDone: markDone,
     setAssumeOut: setAssumeOut,
     floorsOf: floorsOf,
+    floorNote: floorNote,
+    setFloorNote: setFloorNote,
+    logOverLimit: logOverLimit,
+    overLimitList: overLimitList,
     sidesOf: sidesOf,
     floorKey: floorKey,
     setFloorBags: setFloorBags,

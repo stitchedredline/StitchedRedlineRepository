@@ -159,3 +159,22 @@ textarea{min-height:90px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace
   font-weight:600;
   line-height:1.35;
 }
+
+/* A standing fact about one floor — who lives there, what to expect. */
+.fnote{
+  display:block;
+  font-size:12px;
+  color:#f0b429;
+  font-weight:600;
+  margin-top:2px;
+}
+
+/* Doors that went over the posted bag limit, for handing to the property. */
+#overList{ margin-bottom:10px; }
+#overList b{ display:block; margin-bottom:6px; color:#ffb4a2; }
+.overrow{
+  font-size:14px;
+  color:#ffd9d1;
+  padding:4px 0;
+  border-bottom:1px solid #2a2f38;
+}
