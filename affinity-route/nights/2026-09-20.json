@@ -3,12 +3,18 @@
   "property": "affinity1",
   "source": "called out live",
   "floorBags": {
-    "b-2202|left|3":  0,
-    "b-2202|left|2":  2,
-    "b-2202|left|1":  3,
+    "b-2202|left|3": 0,
+    "b-2202|left|2": 2,
+    "b-2202|left|1": 3,
     "b-2202|right|3": 3,
     "b-2202|right|2": 3,
-    "b-2202|right|1": 4
+    "b-2202|right|1": 4,
+    "b-2206|left|3": 2,
+    "b-2206|left|2": 2,
+    "b-2206|left|1": 3
   },
-  "walked": ["b-2202"]
+  "walked": [
+    "b-2202",
+    "b-2206"
+  ]
 }
