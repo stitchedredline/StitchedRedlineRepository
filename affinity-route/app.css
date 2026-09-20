@@ -146,3 +146,16 @@ textarea{min-height:90px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace
   font-size:22px;font-weight:800}
 .floor .fbtns button.z{font-size:14px}
 .floor.current{box-shadow:0 0 0 2px var(--info)}
+
+/* Building note — a standing reminder for a building, e.g. a posted hot sheet. */
+.bnote{
+  background:#3a2a05;
+  border:1px solid #8a6a12;
+  border-left:4px solid #f0b429;
+  border-radius:10px;
+  padding:12px 14px;
+  margin:12px 0;
+  color:#ffe6a7;
+  font-weight:600;
+  line-height:1.35;
+}

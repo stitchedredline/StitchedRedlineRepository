@@ -176,11 +176,24 @@
 
   /* ---------- buildings / sides ---------- */
 
+  /* Speak a building's standing note when you walk up to it — hands are full
+     and the screen is in a pocket. Once per arrival, not once per render. */
+  var noteSaid = null;
+  function announceNote() {
+    var b = building();
+    if (!b.note || noteSaid === b.id) return;
+    noteSaid = b.id;
+    beep(660, 140);
+    say(b.note);
+  }
+
   function goto(i) {
     idx = Math.max(0, Math.min(buildings.length - 1, i));
+    if (buildings[idx].id !== (noteSaid || '')) noteSaid = null;
     Store.setBuilding(building().id);
     if (sides().indexOf(side) < 0) side = sides()[0];
     render();
+    announceNote();
   }
 
   function nextBuilding() {
@@ -214,6 +227,10 @@
     var bb = Store.buildingBags(b.id);
     $('bMeta').textContent = floors().length + ' floors · ' + bb.bags + ' bags · building ' +
       (idx + 1) + ' of ' + buildings.length + (Store.night.visited[b.id] ? ' · walked' : '');
+
+    var note = $('bNote');
+    note.textContent = b.note ? '\u26a0 ' + b.note : '';
+    note.hidden = !b.note;
 
     var tabs = $('sideTabs');
     tabs.innerHTML = '';
@@ -311,6 +328,7 @@
   Store.setBuilding(building().id);
   if (sides().indexOf(side) < 0) side = sides()[0];
   render();
+  announceNote();
   paint();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
 })();

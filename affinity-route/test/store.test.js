@@ -105,6 +105,22 @@ Store.importRoute(Store.parseRouteText('2202: 101-108, 201-208\n2206: 101-104\n2
 ok('re-importing the route keeps door history',
    JSON.stringify(Store.cfg.history['b-2202.101']) === before);
 
+/* route.json carries per-building layout. A single-staircase building must not
+   come back with two sides, and a standing note must survive the import. */
+Store.importRoute([
+  { name: '2215', floors: 3, sides: ['single'], units: [] },
+  { name: '1028', note: 'Hot sheet at 1028.', units: [] }
+]);
+var single = Store.cfg.buildings[0], noted = Store.cfg.buildings[1];
+ok('import keeps a single-staircase layout', Store.sidesOf(single).join() === 'single');
+ok('import keeps the floor count', Store.floorsOf(single).join() === '3,2,1');
+ok('import keeps a building note', noted.note === 'Hot sheet at 1028.');
+ok('a building with no layout still defaults', Store.sidesOf(noted).join() === 'left,right' &&
+   Store.floorsOf(noted).join() === '3,2,1');
+
+/* Rebuild the door route for the voice-matching checks below. */
+Store.importRoute(Store.parseRouteText('2202: 101-108, 201-208\n2206: 101-104\n2210: 301-304'));
+
 /* Voice matching across a street-addressed property. */
 ok('a building number resolves to a building',
    Route.matchBuilding(Store.cfg, '2206').id === 'b-2206');

@@ -120,8 +120,11 @@ var Store = (function () {
         id: id,
         name: String(b.name),
         order: i + 1,
+        floors: b.floors || null,
+        sides: (b.sides && b.sides.length) ? b.sides.slice() : null,
+        note: b.note || '',
         pin: (cfg.buildings.filter(function (old) { return old.id === id; })[0] || {}).pin || null,
-        units: b.units.map(function (label, j) {
+        units: (b.units || []).map(function (label, j) {
           return { id: id + '.' + label, label: String(label), order: j + 1, note: '', skip: false };
         })
       };

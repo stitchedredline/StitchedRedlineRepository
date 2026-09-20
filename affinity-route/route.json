@@ -7,38 +7,61 @@
     {
       "name": "2202",
       "floors": 3,
-      "sides": ["left", "right"],
+      "sides": [
+        "left",
+        "right"
+      ],
       "units": []
     },
     {
       "name": "2206",
       "floors": 3,
-      "sides": ["left", "right"],
+      "sides": [
+        "left",
+        "right"
+      ],
       "units": []
     },
     {
       "name": "2212",
       "floors": 3,
-      "sides": ["left", "right"],
+      "sides": [
+        "left",
+        "right"
+      ],
       "units": []
     },
     {
       "name": "2215",
       "floors": 3,
-      "sides": ["single"],
+      "sides": [
+        "single"
+      ],
       "units": []
     },
     {
       "name": "8102",
       "floors": 3,
-      "sides": ["left", "right"],
+      "sides": [
+        "left",
+        "right"
+      ],
       "units": []
     },
     {
       "name": "No Number 1",
       "_note": "unnamed building, needs a landmark to identify it for real (pool? office? mailboxes?)",
       "floors": 3,
-      "sides": ["left", "right"],
+      "sides": [
+        "left",
+        "right"
+      ],
+      "units": []
+    },
+    {
+      "name": "1028",
+      "note": "Hot sheet at 1028 — read it before you walk the building.",
+      "_note": "floors and sides not confirmed yet; defaults to 3 floors, left and right. Walking order may need moving.",
       "units": []
     }
   ]
