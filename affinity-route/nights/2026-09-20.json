@@ -11,10 +11,41 @@
     "b-2202|right|1": 4,
     "b-2206|left|3": 2,
     "b-2206|left|2": 2,
-    "b-2206|left|1": 3
+    "b-2206|left|1": 3,
+    "b-2206|right|3": 2,
+    "b-2206|right|2": 3,
+    "b-2206|right|1": 0,
+    "b-2212|left|3": 4,
+    "b-2212|left|2": 5,
+    "b-2212|left|1": 3,
+    "b-2212|right|3": 2,
+    "b-2212|right|2": 4,
+    "b-2212|right|1": 2,
+    "b-2215|single|3": 4,
+    "b-2215|single|2": 3,
+    "b-2215|single|1": 1,
+    "b-8102|left|3": 3,
+    "b-8102|left|2": 3,
+    "b-8102|left|1": 2,
+    "b-8102|right|3": 3,
+    "b-8102|right|2": 3,
+    "b-8102|right|1": 2,
+    "b-no-number-1|left|3": 4,
+    "b-no-number-1|left|2": 2,
+    "b-no-number-1|left|1": 0,
+    "b-no-number-1|right|3": 4,
+    "b-no-number-1|right|2": 2,
+    "b-no-number-1|right|1": 0
   },
   "walked": [
     "b-2202",
-    "b-2206"
+    "b-2206",
+    "b-2212",
+    "b-2215",
+    "b-8102",
+    "b-no-number-1"
+  ],
+  "runs": [
+    { "bags": 83, "note": "first compactor run, truck full" }
   ]
 }
