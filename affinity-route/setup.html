@@ -22,6 +22,18 @@
     <button class="btn sec" id="btnSaveCfg">Save</button>
   </div>
 
+  <h2>Paste the whole property</h2>
+  <div class="card">
+    <p class="muted">Fastest way in. One building per line, walking order,
+      <code>number: units</code>. Ranges work.</p>
+    <textarea id="bulk" spellcheck="false" placeholder="2202: 101-108, 201-208&#10;2206: 101-108, 201-208&#10;2210: 101-104"></textarea>
+    <div class="row">
+      <button class="btn" id="btnBulk">Build route from this</button>
+      <button class="btn sec" id="btnSeed">Load shared route</button>
+    </div>
+    <p class="muted" id="bulkMsg"></p>
+  </div>
+
   <h2>Buildings</h2>
   <p class="muted">Add them in the order you actually walk them. Unit numbers accept
     ranges: <code>101-108, 110, 201-208</code>.</p>

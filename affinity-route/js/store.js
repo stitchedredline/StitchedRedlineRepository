@@ -39,7 +39,8 @@ var Store = (function () {
 
   function freshNight() {
     return { id: nightId(), flags: {}, done: {}, bags: 0, runs: [],
-             startedAt: null, lastPull: 0, assumeOut: false, visited: {}, atBuilding: null };
+             startedAt: null, lastPull: 0, assumeOut: false, visited: {},
+             atBuilding: null, floorBags: {}, atSide: 'left', atFloor: null };
   }
 
   var cfg = Object.assign({}, defaults, read(CFG_KEY, {}));
@@ -89,11 +90,71 @@ var Store = (function () {
     return out;
   }
 
+  /* Deterministic id from the building's number, so a route that gets reloaded
+     from route.json keeps every door's history instead of orphaning it. */
+  function buildingIdFor(name) {
+    return 'b-' + String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  /* "2202: 101-108, 201-208" per line — paste the whole property at once. */
+  function parseRouteText(text) {
+    var out = [];
+    String(text || '').split(/\n/).forEach(function (line) {
+      line = line.replace(/^\s*[#\/].*$/, '').trim();
+      if (!line) return;
+      var m = line.match(/^([^:]+?)\s*[:\t]\s*(.+)$/) || line.match(/^(\S+)\s+(.+)$/);
+      if (!m) return;
+      var units = expandUnitList(m[2]);
+      if (!units.length) return;
+      out.push({ name: m[1].trim(), units: units });
+    });
+    return out;
+  }
+
+  /* Replace the route wholesale. History is keyed by unit id, and ids are
+     derived from the building number, so it survives this. */
+  function importRoute(list) {
+    cfg.buildings = list.map(function (b, i) {
+      var id = buildingIdFor(b.name);
+      return {
+        id: id,
+        name: String(b.name),
+        order: i + 1,
+        pin: (cfg.buildings.filter(function (old) { return old.id === id; })[0] || {}).pin || null,
+        units: b.units.map(function (label, j) {
+          return { id: id + '.' + label, label: String(label), order: j + 1, note: '', skip: false };
+        })
+      };
+    });
+    saveCfg();
+    return cfg.buildings.length;
+  }
+
+  /* Pull the shared route.json that ships with the repo. Lets the route be
+     edited on a laptop and picked up by the phone. */
+  function loadSeed(url) {
+    return fetch((url || 'route.json') + '?t=' + Date.now())
+      .then(function (r) {
+        if (!r.ok) throw new Error('route.json not found');
+        return r.json();
+      })
+      .then(function (data) {
+        if (data.propertyName) cfg.propertyName = data.propertyName;
+        if (data.propertyId) cfg.propertyId = data.propertyId;
+        if (data.bagCapacity) cfg.bagCapacity = data.bagCapacity;
+        if (!data.buildings || !data.buildings.length) throw new Error('route.json has no buildings');
+        var n = importRoute(data.buildings);
+        return { buildings: n, doors: allUnits().length };
+      });
+  }
+
   function addBuilding(name) {
-    var id = 'B' + (cfg.buildings.length + 1) + '-' + Math.random().toString(36).slice(2, 6);
+    var base = name || ('Building ' + (cfg.buildings.length + 1));
+    var id = buildingIdFor(base);
+    while (cfg.buildings.some(function (b) { return b.id === id; })) id += '-x';
     cfg.buildings.push({
       id: id,
-      name: name || ('Building ' + (cfg.buildings.length + 1)),
+      name: base,
       order: cfg.buildings.length + 1,
       pin: null,
       units: []
@@ -154,6 +215,69 @@ var Store = (function () {
     if (d.outcome === 'picked') night.bags = Math.max(0, night.bags - 1);
     delete night.done[unitId];
     saveNight();
+  }
+
+  /* ---------- floors ---------- */
+
+  /* Most buildings here are walked as floor + side, not as a list of doors.
+     A door number carries its floor in the first digit (204 -> floor 2), so
+     the two models line up when door numbers exist. */
+  function floorsOf(b) {
+    if (!b) return [];
+    if (b.units && b.units.length) {
+      var seen = {};
+      b.units.forEach(function (u) {
+        var f = parseInt(String(u.label).charAt(0), 10);
+        if (f > 0) seen[f] = true;
+      });
+      var list = Object.keys(seen).map(Number).sort(function (x, y) { return y - x; });
+      if (list.length) return list;
+    }
+    var n = b.floors || 3;
+    var out = [];
+    for (var i = n; i >= 1; i--) out.push(i);
+    return out;   // top floor first — that is the way it gets walked
+  }
+
+  function sidesOf(b) {
+    if (!b) return [];
+    return (b.sides && b.sides.length) ? b.sides : ['left', 'right'];
+  }
+
+  function floorKey(buildingId, side, floor) {
+    return buildingId + '|' + (side || '-') + '|' + floor;
+  }
+
+  function setFloorBags(buildingId, side, floor, bags) {
+    var k = floorKey(buildingId, side, floor);
+    if (bags === null || bags === undefined) delete night.floorBags[k];
+    else night.floorBags[k] = { bags: Math.max(0, bags | 0), at: Date.now() };
+    if (!night.startedAt) night.startedAt = Date.now();
+    night.atSide = side;
+    night.atFloor = floor;
+    saveNight();
+    queue({ type: 'floor', building: buildingId, side: side, floor: floor, bags: bags, at: Date.now() });
+  }
+
+  function getFloorBags(buildingId, side, floor) {
+    var rec = night.floorBags[floorKey(buildingId, side, floor)];
+    return rec ? rec.bags : null;
+  }
+
+  function buildingBags(buildingId) {
+    var total = 0, logged = 0;
+    Object.keys(night.floorBags).forEach(function (k) {
+      if (k.split('|')[0] !== buildingId) return;
+      total += night.floorBags[k].bags;
+      logged++;
+    });
+    return { bags: total, floorsLogged: logged };
+  }
+
+  function totalFloorBags() {
+    return Object.keys(night.floorBags).reduce(function (n, k) {
+      return n + night.floorBags[k].bags;
+    }, 0);
   }
 
   /* Sunday mode: assume every door has trash and only log the exceptions.
@@ -230,10 +354,23 @@ var Store = (function () {
       rec.nights += 1;
       if (hadTrash) rec.out += 1;
     });
+    /* Floor-level history: average bags and how often a floor-side is dead.
+       This is what lets the app eventually say "skip the top floor of 2202". */
+    var fh = cfg.floorHistory || (cfg.floorHistory = {});
+    Object.keys(night.floorBags).forEach(function (k) {
+      var rec = fh[k] || (fh[k] = { nights: 0, bags: 0, empties: 0 });
+      var bags = night.floorBags[k].bags;
+      rec.nights += 1;
+      rec.bags += bags;
+      if (bags === 0) rec.empties += 1;
+    });
+
     cfg.lastClosed = night.id;
     saveCfg();
     var summary = {
       id: night.id,
+      floorBags: totalFloorBags(),
+      buildingsWalked: Object.keys(night.visited).length,
       picked: Object.keys(night.done).filter(function (k) { return night.done[k].outcome === 'picked'; }).length,
       empty: Object.keys(night.done).filter(function (k) { return night.done[k].outcome === 'empty'; }).length,
       runs: night.runs.length,
@@ -330,11 +467,22 @@ var Store = (function () {
     findUnit: findUnit,
     expandUnitList: expandUnitList,
     addBuilding: addBuilding,
+    parseRouteText: parseRouteText,
+    importRoute: importRoute,
+    loadSeed: loadSeed,
+    buildingIdFor: buildingIdFor,
     setUnits: setUnits,
     reorderBuildings: reorderBuildings,
     flag: flag,
     markDone: markDone,
     setAssumeOut: setAssumeOut,
+    floorsOf: floorsOf,
+    sidesOf: sidesOf,
+    floorKey: floorKey,
+    setFloorBags: setFloorBags,
+    getFloorBags: getFloorBags,
+    buildingBags: buildingBags,
+    totalFloorBags: totalFloorBags,
     setBuilding: setBuilding,
     markBuildingWalked: markBuildingWalked,
     isEmpty: isEmpty,

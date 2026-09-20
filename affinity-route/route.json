@@ -1,0 +1,17 @@
+{
+  "_howto": "The shared route. Edit on a laptop, push, then hit 'Load shared route' in the app. Building ids come from the name, so reloading keeps history. Walking order matters. 'units' can stay empty when you count bags by floor instead of by door.",
+  "propertyName": "Affinity - Charlotte",
+  "propertyId": "affinity1",
+  "bagCapacity": 12,
+  "buildings": [
+    {
+      "name": "2202",
+      "floors": 3,
+      "sides": [
+        "left",
+        "right"
+      ],
+      "units": []
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "night": "2026-09-20",
+  "property": "affinity1",
+  "source": "called out live",
+  "floorBags": {
+    "b-2202|left|3":  0,
+    "b-2202|left|2":  2,
+    "b-2202|left|1":  3,
+    "b-2202|right|3": 3,
+    "b-2202|right|2": 3,
+    "b-2202|right|1": 4
+  },
+  "walked": ["b-2202"]
+}

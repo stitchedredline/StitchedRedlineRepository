@@ -28,6 +28,32 @@ of the nights it was observed, with at least three nights of data. A hit-or-miss
 door still gets checked — missing real trash costs a complaint, checking one
 extra door costs three seconds.
 
+## Counting bags by floor
+
+The route is really walked as **building → side → floor**, top down, and the
+number that matters per floor is how many bags came off it. That is what
+`floors.html` records.
+
+Pick a side, then call it out the way you'd say it out loud:
+
+> "Top floor, left side, third floor zero bags, second floor two bags, bottom
+> floor three bags."
+
+That logs all three floors in one breath. It understands `top floor` and
+`bottom floor` (resolved against the building's real height), ordinals,
+`floor three` word order, a bare trailing number (`third floor zero`), and
+`nothing` / `empty` as zero. Say `right side` to switch sides, `building 2206`
+to jump, `undo` to take one back. The `0 / − / +` buttons on each floor row do
+the same job with a thumb.
+
+Floors come from the door numbers when you have them — 204 is floor 2 — and
+fall back to the building's `floors` setting when you don't. You do not need
+apartment numbers to use this mode.
+
+After a few nights each floor row shows its own average and how often it comes
+up empty, which is how the app earns the right to tell you to skip the top
+floor of a building.
+
 ## Busy nights: call out the empties
 
 On a night when most doors *do* have trash, logging the hits is backwards —
@@ -71,7 +97,8 @@ bonus; lose signal and nothing stops working.
 
 ```
 index.html      driver screen — the thing you use on shift
-sunday.html     busy-night mode: call out the empties by voice
+floors.html     count bags by floor, top down, by voice
+sunday.html     busy-night mode: call out the empty doors by voice
 out.html        what a resident sees after scanning a tag
 setup.html      one-time route builder + GPS pins + backup
 qr.html         printable QR tags, one per door
@@ -80,6 +107,9 @@ config.js       your backend URL goes here
 js/route.js     routing, skip logic, prediction, GPS optimizer
 js/store.js     local storage, night state, sync
 js/sunday.js    voice capture, building tracking, empty logging
+js/floors.js    floor/side bag counting
+route.json      the shared route — edit on a laptop, pull it down on the phone
+nights/         call-outs captured per night
 backend/Code.gs Google Apps Script backend (free)
 test/           node test/route.test.js
 ```
@@ -103,7 +133,19 @@ like a normal app.
 Open **Route setup**. Add each building in the order you actually walk it,
 and paste the unit numbers — ranges work: `101-108, 110, 201-208`.
 
-Or tap **Load sample** to try the whole app with 19 fake buildings first.
+Or paste the whole property into the bulk box — one line per building,
+`2202: 101-108, 201-208`. Ranges expand, `#` lines are ignored.
+
+Counting bags by floor instead of by door? Leave the units off and set
+`floors` and `sides` in `route.json`:
+
+```json
+{ "name": "2202", "floors": 3, "sides": ["left", "right"], "units": [] }
+```
+
+Edit `route.json` on the laptop, push it, then hit **Load shared route** on the
+phone — beats thumb-typing 19 buildings. Building ids are derived from the
+building number, so reloading the route keeps all the history attached.
 
 Back it up: hit **Fill with my data**, copy the text, email it to yourself.
 The route lives on the phone, so that text is your only spare copy.

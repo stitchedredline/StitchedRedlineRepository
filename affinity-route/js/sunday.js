@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var cfg = Store.cfg, night = Store.night;
+  var cfg = Store.cfg;
 
   var buildings = cfg.buildings.slice().sort(function (a, b) { return a.order - b.order; });
   if (!buildings.length) {
@@ -16,7 +16,7 @@
 
   Store.setAssumeOut(true);
 
-  var idx = Math.max(0, buildings.findIndex(function (b) { return b.id === night.atBuilding; }));
+  var idx = Math.max(0, buildings.findIndex(function (b) { return b.id === Store.night.atBuilding; }));
   var listening = false;
   var speakBack = localStorage.getItem('affinity.speak') !== 'off';
   var lastActed = [];
@@ -59,18 +59,25 @@
 
   /* ---------- logging an empty ---------- */
 
+  function toggle(hit, viaVoice, extraSub) {
+    var nowEmpty = Store.toggleEmpty(hit.unitId);
+    if (nowEmpty) lastActed.push(hit.unitId);
+    feedback(true, hit.label,
+      (nowEmpty ? 'marked empty' : 'un-marked — back to has trash') + (extraSub || ''));
+    if (viaVoice) say(hit.label + (nowEmpty ? ' empty' : ' back on'));
+    render();
+    return true;
+  }
+
   function logEmpty(label, viaVoice) {
     var m = Route.matchUnits(cfg, label, building().id);
 
-    if (m.here.length === 1) {
-      var hit = m.here[0];
-      var nowEmpty = Store.toggleEmpty(hit.unitId);
-      if (nowEmpty) lastActed.push(hit.unitId);
-      feedback(true, hit.label, nowEmpty ? 'marked empty' : 'un-marked — back to has trash');
-      if (viaVoice) say(hit.label + (nowEmpty ? ' empty' : ' back on'));
-      render();
-      return true;
-    }
+    /* Normal case: a door in the building you are standing in. */
+    if (m.here.length === 1) return toggle(m.here[0], viaVoice);
+
+    /* You said a building number — go there instead of erroring. */
+    var b = Route.matchBuilding(cfg, label);
+    if (b) { gotoBuilding(b.id, viaVoice); return true; }
 
     if (!m.all.length) {
       feedback(false, label, 'no door ' + label + ' on the property');
@@ -78,11 +85,21 @@
       return false;
     }
 
-    /* Number exists, just not in the building the app thinks you are in. */
-    feedback(false, label, 'not in ' + building().name +
-      ' — it is in ' + m.all.map(function (h) { return h.buildingName; }).join(', ') +
-      '. Change building at the top.');
-    if (viaVoice) say('wrong building');
+    /* Apartment numbers unique across the whole property: just follow you
+       there rather than making you manage the building selector. */
+    if (m.all.length === 1) {
+      var hit = m.all[0];
+      var i = buildings.findIndex(function (x) { return x.id === hit.buildingId; });
+      if (i > -1) { idx = i; Store.setBuilding(hit.buildingId); }
+      if (viaVoice) say(hit.buildingName);
+      return toggle(hit, viaVoice, ' · switched to ' + hit.buildingName);
+    }
+
+    /* Same number in several buildings and you are not in one of them. */
+    feedback(false, label, 'door ' + label + ' exists in ' +
+      m.all.map(function (h) { return h.buildingName; }).join(', ') +
+      ' — say "building ' + m.all[0].buildingName + '" first.');
+    if (viaVoice) say('which building');
     return false;
   }
 
@@ -148,6 +165,15 @@
       var cmd = Route.spokenCommand(texts[t]);
       if (cmd === 'next') { nextBuilding(); return; }
       if (cmd === 'undo') { undoLast(); return; }
+
+      var wantBldg = Route.spokenBuilding(texts[t]);
+      if (wantBldg) {
+        var b = Route.matchBuilding(cfg, wantBldg);
+        if (b) { gotoBuilding(b.id, true); return; }
+        feedback(false, wantBldg, 'no building ' + wantBldg + ' on your route');
+        say('no building ' + wantBldg);
+        return;
+      }
     }
 
     for (var a = 0; a < texts.length; a++) {
@@ -186,6 +212,15 @@
     render();
   }
 
+  function gotoBuilding(id, viaVoice) {
+    var i = buildings.findIndex(function (b) { return b.id === id; });
+    if (i < 0) return false;
+    goto(i);
+    feedback(true, building().name, 'now walking ' + building().name);
+    if (viaVoice) say('building ' + String(building().name).split('').join(' '));
+    return true;
+  }
+
   function nextBuilding() {
     Store.markBuildingWalked(building().id);
     if (idx >= buildings.length - 1) {
@@ -207,7 +242,7 @@
     var emptiesHere = Store.emptyCount(b.id);
     $('bMeta').textContent = (b.units || []).length + ' doors · ' +
       emptiesHere + ' empty · building ' + (idx + 1) + ' of ' + buildings.length +
-      (night.visited[b.id] ? ' · walked' : '');
+      (Store.night.visited[b.id] ? ' · walked' : '');
 
     var grid = $('grid');
     grid.innerHTML = '';
@@ -226,7 +261,7 @@
       });
 
     var total = Store.emptyCount();
-    var walked = Object.keys(night.visited).length;
+    var walked = Object.keys(Store.night.visited).length;
     $('tally').textContent = total + ' empties logged tonight';
     $('shiftStat').textContent = walked + ' of ' + buildings.length +
       ' buildings walked. Closing out saves tonight into each door’s history — ' +
@@ -258,7 +293,7 @@
   $('btnSound').textContent = 'Voice back: ' + (speakBack ? 'on' : 'off');
 
   $('btnClose').onclick = function () {
-    var walked = Object.keys(night.visited).length;
+    var walked = Object.keys(Store.night.visited).length;
     if (walked < buildings.length &&
         !confirm('You have only marked ' + walked + ' of ' + buildings.length +
                  ' buildings as walked. Close out anyway? Unwalked buildings will not ' +

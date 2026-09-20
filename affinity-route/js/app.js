@@ -180,6 +180,16 @@
 
   $('btnRefresh').onclick = function () { sync(true); };
 
+  $('btnSeedHome').onclick = function () {
+    $('seedMsg').textContent = 'Loading…';
+    Store.loadSeed().then(function (r) {
+      $('seedMsg').textContent = r.buildings + ' buildings, ' + r.doors + ' doors loaded.';
+      render();
+    }).catch(function (e) {
+      $('seedMsg').textContent = 'Could not load route.json — ' + e.message;
+    });
+  };
+
   render();
   sync(false);
   setInterval(function () { sync(false); }, 90000);

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bags by Floor</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Bags by floor</h1>
+      <div class="sub">Top floor down, one side at a time</div>
+    </div>
+    <div class="spacer"></div>
+    <a class="btn sec sm" href="index.html">Exit</a>
+  </div>
+
+  <div class="bldgnav">
+    <button class="btn sec" id="bPrev" aria-label="Previous building">◀</button>
+    <div class="bldgnow">
+      <b id="bName">—</b>
+      <span id="bMeta" class="muted"></span>
+    </div>
+    <button class="btn sec" id="bNext" aria-label="Next building">▶</button>
+  </div>
+
+  <div class="tabs" id="sideTabs" role="group" aria-label="Side of building"></div>
+
+  <div class="card" id="heard">
+    <div class="heardlabel">Last heard</div>
+    <div class="heardbig" id="heardBig">—</div>
+    <div class="muted" id="heardSub">Say it the way you'd call it out:
+      "third floor zero bags, second floor two bags, bottom floor three."</div>
+  </div>
+
+  <button class="mic" id="mic" aria-pressed="false">
+    <span class="dot"></span>
+    <span id="micLabel">Start listening</span>
+  </button>
+
+  <div id="floors"></div>
+
+  <div class="card">
+    <b id="tally">0 bags this building</b>
+    <p class="muted" id="advice"></p>
+    <div class="row">
+      <button class="btn warn" id="btnDump">Compactor run</button>
+      <button class="btn" id="btnFinish">Finish building &amp; next</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="muted" id="shiftStat"></p>
+    <button class="btn sec" id="btnClose">Close out tonight</button>
+  </div>
+</div>
+
+<script src="js/route.js"></script>
+<script src="js/store.js"></script>
+<script src="js/floors.js"></script>
+</body>
+</html>

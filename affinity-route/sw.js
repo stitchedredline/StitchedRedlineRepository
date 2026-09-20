@@ -1,10 +1,10 @@
 /* Cache-first so the app opens instantly in a dead stairwell.
    Bump CACHE when you change any file, or phones keep the old copy. */
-var CACHE = 'affinity-route-v2';
+var CACHE = 'affinity-route-v4';
 var FILES = [
-  'index.html', 'out.html', 'sunday.html', 'setup.html', 'qr.html', 'history.html',
-  'app.css', 'config.js', 'icon.svg', 'manifest.webmanifest',
-  'js/store.js', 'js/route.js', 'js/app.js', 'js/setup.js', 'js/qr.js', 'js/sunday.js'
+  'index.html', 'out.html', 'sunday.html', 'floors.html', 'setup.html', 'qr.html', 'history.html',
+  'app.css', 'config.js', 'route.json', 'icon.svg', 'manifest.webmanifest',
+  'js/store.js', 'js/route.js', 'js/app.js', 'js/setup.js', 'js/qr.js', 'js/sunday.js', 'js/floors.js'
 ];
 
 self.addEventListener('install', function (e) {
@@ -26,6 +26,9 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(e.request.url);
   /* Never cache the Apps Script endpoint — stale scan data is worse than none. */
   if (e.request.method !== 'GET' || url.hostname.indexOf('script.google') > -1) return;
+  /* Cache-busted fetches (route.json?t=...) must hit the network and must not
+     pile up a new cache entry every time. */
+  if (url.search) { e.respondWith(fetch(e.request)); return; }
   e.respondWith(
     caches.match(e.request).then(function (hit) {
       return hit || fetch(e.request).then(function (res) {

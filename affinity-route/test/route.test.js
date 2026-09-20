@@ -81,5 +81,43 @@ var home = { lat: 35.2271, lng: -80.8431 };
 var order = Route.optimizeOrder(pts, home).map(function (x) { return x.id; });
 ok('optimizer walks nearest first', order[0] === 'near' && order[2] === 'far');
 
+/* ---- floors and bag counts, spoken the way the route is actually walked ---- */
+
+function callOut(text, top, state) {
+  return Route.applyFloorCall(Route.parseFloorCall(text, top), state || {});
+}
+
+var left = callOut('Top floor, left side, third floor, zero bags, second floor, two bags, ' +
+                   'bottom floor, three bags.', 3);
+ok('a whole side in one breath yields three floors', left.entries.length === 3);
+ok('side is picked up', left.entries.every(function (e) { return e.side === 'left'; }));
+ok('top/third floor reads zero', left.entries[0].floor === 3 && left.entries[0].bags === 0);
+ok('second floor reads two', left.entries[1].floor === 2 && left.entries[1].bags === 2);
+ok('bottom floor is floor 1', left.entries[2].floor === 1 && left.entries[2].bags === 3);
+
+var right = callOut('right side, top floor, three bags, second floor, three bags, ' +
+                    'bottom floor, four bags', 3);
+ok('the other side parses the same way', right.entries.length === 3);
+ok('"top floor" resolves against the building height',
+   right.entries[0].floor === 3 && right.entries[0].bags === 3);
+ok('right side is carried across every floor',
+   right.entries.every(function (e) { return e.side === 'right'; }));
+ok('totals add up', right.entries.reduce(function (n, e) { return n + e.bags; }, 0) === 10);
+
+ok('a bare trailing number is the bag count',
+   callOut('third floor zero', 3).entries[0].bags === 0);
+ok('"nothing" counts as zero',
+   callOut('second floor nothing', 3).entries[0].bags === 0);
+ok('"floor three" word order works',
+   callOut('floor three two bags', 3).entries[0].floor === 3);
+ok('a four-storey building puts "top" on four',
+   callOut('top floor one bag', 4).entries[0].floor === 4);
+ok('side carries over from where you already were',
+   callOut('second floor two bags', 3, { side: 'right' }).entries[0].side === 'right');
+ok('a floor with no count logs nothing',
+   callOut('top floor, left side', 3).entries.length === 0);
+ok('a side-only call still reports the side',
+   callOut('right side', 3).side === 'right');
+
 console.log(fails ? '\n' + fails + ' FAILED' : '\nall good');
 process.exit(fails ? 1 : 0);

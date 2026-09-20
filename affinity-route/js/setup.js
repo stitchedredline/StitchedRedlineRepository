@@ -52,6 +52,42 @@
     render();
   };
 
+  $('btnBulk').onclick = function () {
+    var list = Store.parseRouteText($('bulk').value);
+    if (!list.length) {
+      $('bulkMsg').textContent = 'Nothing parsed. Each line needs a building number, ' +
+        'a colon, then the units: 2202: 101-108, 201-208';
+      return;
+    }
+    var doors = list.reduce(function (n, b) { return n + b.units.length; }, 0);
+    if (cfg.buildings.length &&
+        !confirm('Replace your current route with ' + list.length + ' buildings / ' +
+                 doors + ' doors? Door history is kept.')) return;
+    Store.importRoute(list);
+    $('bulkMsg').textContent = list.length + ' buildings, ' + doors + ' doors loaded.';
+    render();
+  };
+
+  $('btnSeed').onclick = function () {
+    $('bulkMsg').textContent = 'Loading route.json…';
+    Store.loadSeed().then(function (r) {
+      $('bulkMsg').textContent = 'Loaded ' + r.buildings + ' buildings, ' + r.doors + ' doors.';
+      $('propName').value = Store.cfg.propertyName || '';
+      render();
+    }).catch(function (e) {
+      $('bulkMsg').textContent = 'Could not load route.json — ' + e.message;
+    });
+  };
+
+  /* Prefill the paste box with whatever route is already loaded, so editing
+     the whole property is one text box instead of nineteen cards. */
+  function fillBulk() {
+    $('bulk').value = cfg.buildings.slice().sort(function (a, b) { return a.order - b.order; })
+      .map(function (b) {
+        return b.name + ': ' + (b.units || []).map(function (u) { return u.label; }).join(', ');
+      }).join('\n');
+  }
+
   /* A throwaway 19-building property so you can see the app work before
      spending ten minutes typing your real doors in. */
   $('btnDemo').onclick = function () {
@@ -63,6 +99,7 @@
     }
     Store.saveCfg();
     render();
+    fillBulk();
     alert('Sample route loaded: 19 buildings, 304 doors. Delete it and build your real one when you have time.');
   };
 
@@ -137,4 +174,5 @@
   };
 
   render();
+  fillBulk();
 })();

@@ -158,6 +158,23 @@
     return out;
   }
 
+  /* "building twenty two oh six" / "building 2206" -> "2206" */
+  function spokenBuilding(text) {
+    var t = String(text || '').toLowerCase();
+    var m = t.match(/\b(?:building|bldg|address)\b(.*)$/);
+    if (!m) return null;
+    var nums = parseSpokenUnits(m[1]);
+    return nums.length ? nums[0] : null;
+  }
+
+  function matchBuilding(cfg, spoken) {
+    var want = String(spoken).toLowerCase();
+    var hits = (cfg.buildings || []).filter(function (b) {
+      return String(b.name).toLowerCase() === want;
+    });
+    return hits.length === 1 ? hits[0] : null;
+  }
+
   /* Match what you said against real doors. The building you are standing in
      wins, because 101 exists in every building on the property. */
   function matchUnits(cfg, spoken, currentBuildingId) {
@@ -171,6 +188,119 @@
     });
     var here = hits.filter(function (h) { return h.buildingId === currentBuildingId; });
     return { exact: here.length === 1 ? here[0] : null, all: hits, here: here };
+  }
+
+  /* ---------- spoken floors and bag counts ---------- */
+
+  var ORDINALS = {
+    first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6,
+    seventh: 7, eighth: 8, ninth: 9, tenth: 10,
+    '1st': 1, '2nd': 2, '3rd': 3, '4th': 4, '5th': 5, '6th': 6,
+    '7th': 7, '8th': 8, '9th': 9, '10th': 10
+  };
+  var FLOOR_WORD = { floor: 1, floors: 1, flr: 1, level: 1, story: 1, storey: 1 };
+  var ZERO_WORD = { none: 1, nothing: 1, empty: 1, nada: 1, clear: 1, zip: 1 };
+  var BAG_WORD = { bag: 1, bags: 1, bagged: 1 };
+
+  /* "Top floor, left side, third floor zero bags, second floor two bags,
+      bottom floor three bags" -> an ordered list of what you just said.
+     Emits side/floor/bags events in the order spoken; the caller tracks which
+     floor and side are current, exactly the way you walk it. */
+  function parseFloorCall(text, topFloor) {
+    var tokens = String(text || '').toLowerCase()
+      .replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+
+    var events = [];
+    var held = null;            // a number/top/bottom waiting for "floor" or "bags"
+    var expectFloorNumber = false;
+    var sawFloor = false;
+
+    function resolve(h) {
+      if (!h) return null;
+      if (h.kind === 'top') return topFloor || null;
+      if (h.kind === 'bottom') return 1;
+      return h.v;
+    }
+
+    tokens.forEach(function (tok) {
+      if (tok === 'left' || tok === 'right') {
+        events.push({ type: 'side', value: tok });
+        return;
+      }
+      if (tok === 'side' || tok === 'stairwell' || tok === 'wing') return;
+
+      if (tok === 'top' || tok === 'upper') { held = { kind: 'top' }; return; }
+      if (tok === 'bottom' || tok === 'ground' || tok === 'lower' || tok === 'lobby') {
+        held = { kind: 'bottom' }; return;
+      }
+
+      if (ORDINALS.hasOwnProperty(tok)) { held = { kind: 'num', v: ORDINALS[tok] }; return; }
+
+      if (FLOOR_WORD.hasOwnProperty(tok)) {
+        if (held) {
+          var f = resolve(held);
+          if (f !== null) { events.push({ type: 'floor', value: f }); sawFloor = true; }
+          held = null;
+        } else {
+          expectFloorNumber = true;   // "floor three"
+        }
+        return;
+      }
+
+      if (BAG_WORD.hasOwnProperty(tok)) {
+        if (held && held.kind === 'num') {
+          events.push({ type: 'bags', value: held.v });
+          held = null;
+        }
+        return;
+      }
+
+      if (ZERO_WORD.hasOwnProperty(tok)) {
+        events.push({ type: 'bags', value: 0 });
+        held = null;
+        return;
+      }
+
+      var n = null;
+      if (/^\d+$/.test(tok)) n = parseInt(tok, 10);
+      else if (WORDS.hasOwnProperty(tok)) n = WORDS[tok];
+
+      if (n !== null) {
+        if (expectFloorNumber) {
+          events.push({ type: 'floor', value: n });
+          sawFloor = true;
+          expectFloorNumber = false;
+        } else {
+          held = { kind: 'num', v: n };
+        }
+        return;
+      }
+
+      /* an unrelated word breaks the phrase */
+      held = null;
+      expectFloorNumber = false;
+    });
+
+    /* "third floor zero" — a trailing bare number is the bag count. */
+    if (held && held.kind === 'num' && sawFloor) {
+      events.push({ type: 'bags', value: held.v });
+    }
+    return events;
+  }
+
+  /* Fold the spoken events into concrete {side, floor, bags} entries. */
+  function applyFloorCall(events, state) {
+    var side = state && state.side || null;
+    var floor = state && state.floor || null;
+    var out = [];
+    events.forEach(function (ev) {
+      if (ev.type === 'side') { side = ev.value; return; }
+      if (ev.type === 'floor') { floor = ev.value; return; }
+      if (ev.type === 'bags' && floor !== null) {
+        out.push({ side: side, floor: floor, bags: ev.value });
+      }
+    });
+    return { entries: out, side: side, floor: floor };
   }
 
   /* ---------- prediction ---------- */
@@ -287,8 +417,12 @@
 
   return {
     parseSpokenUnits: parseSpokenUnits,
+    parseFloorCall: parseFloorCall,
+    applyFloorCall: applyFloorCall,
     spokenCommand: spokenCommand,
     matchUnits: matchUnits,
+    matchBuilding: matchBuilding,
+    spokenBuilding: spokenBuilding,
     haversine: haversine,
     tourLength: tourLength,
     optimizeOrder: optimizeOrder,
