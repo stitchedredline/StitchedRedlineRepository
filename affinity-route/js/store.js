@@ -37,10 +37,15 @@ var Store = (function () {
     return shifted.getFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
   }
 
+  function freshNight() {
+    return { id: nightId(), flags: {}, done: {}, bags: 0, runs: [],
+             startedAt: null, lastPull: 0, assumeOut: false, visited: {}, atBuilding: null };
+  }
+
   var cfg = Object.assign({}, defaults, read(CFG_KEY, {}));
   var night = read(NIGHT_KEY, null);
   if (!night || night.id !== nightId()) {
-    night = { id: nightId(), flags: {}, done: {}, bags: 0, runs: [], startedAt: null, lastPull: 0 };
+    night = freshNight();
   }
 
   function saveCfg() { write(CFG_KEY, cfg); }
@@ -151,6 +156,49 @@ var Store = (function () {
     saveNight();
   }
 
+  /* Sunday mode: assume every door has trash and only log the exceptions.
+     Far fewer taps on a busy night, and it fills in history much faster. */
+  function setAssumeOut(on) {
+    night.assumeOut = !!on;
+    if (!night.startedAt) night.startedAt = Date.now();
+    saveNight();
+  }
+
+  function setBuilding(buildingId) {
+    night.atBuilding = buildingId;
+    saveNight();
+  }
+
+  /* Mark a building walked, so doors you never reached are not scored as
+     "had trash" when the night is closed out. */
+  function markBuildingWalked(buildingId) {
+    night.visited[buildingId] = Date.now();
+    saveNight();
+  }
+
+  function isEmpty(unitId) {
+    var d = night.done[unitId];
+    return !!(d && d.outcome === 'empty');
+  }
+
+  function toggleEmpty(unitId) {
+    if (isEmpty(unitId)) { undo(unitId); return false; }
+    night.done[unitId] = { at: Date.now(), outcome: 'empty' };
+    if (!night.startedAt) night.startedAt = Date.now();
+    saveNight();
+    queue({ type: 'serviced', unit: unitId, outcome: 'empty', at: Date.now() });
+    return true;
+  }
+
+  function emptyCount(buildingId) {
+    return Object.keys(night.done).filter(function (k) {
+      if (night.done[k].outcome !== 'empty') return false;
+      if (!buildingId) return true;
+      var hit = findUnit(k);
+      return hit && hit.building.id === buildingId;
+    }).length;
+  }
+
   function compactorRun() {
     night.runs.push({ at: Date.now(), bags: night.bags });
     night.bags = 0;
@@ -162,10 +210,24 @@ var Store = (function () {
     var h = cfg.history || (cfg.history = {});
     allUnits().forEach(function (x) {
       var id = x.unit.id;
+      var d = night.done[id];
+      var walked = !!night.visited[x.building.id];
+
+      /* In empty-log mode an untouched door in a building you walked means
+         "had trash". A door in a building you never reached tells us nothing,
+         so it is left out of the average entirely. */
+      var hadTrash, counts;
+      if (night.assumeOut) {
+        counts = walked || !!d;
+        hadTrash = counts && !(d && d.outcome === 'empty');
+      } else {
+        counts = !!d || !!night.flags[id];
+        hadTrash = !!night.flags[id] || (d && d.outcome === 'picked');
+      }
+      if (!counts) return;
+
       var rec = h[id] || (h[id] = { nights: 0, out: 0 });
       rec.nights += 1;
-      var d = night.done[id];
-      var hadTrash = !!night.flags[id] || (d && d.outcome === 'picked');
       if (hadTrash) rec.out += 1;
     });
     cfg.lastClosed = night.id;
@@ -180,13 +242,13 @@ var Store = (function () {
     var log = read('affinity.log.v1', []);
     log.unshift(summary);
     write('affinity.log.v1', log.slice(0, 60));
-    night = { id: nightId(), flags: {}, done: {}, bags: 0, runs: [], startedAt: null, lastPull: 0 };
+    night = freshNight();
     saveNight();
     return summary;
   }
 
   function resetNight() {
-    night = { id: nightId(), flags: {}, done: {}, bags: 0, runs: [], startedAt: null, lastPull: 0 };
+    night = freshNight();
     saveNight();
   }
 
@@ -272,6 +334,12 @@ var Store = (function () {
     reorderBuildings: reorderBuildings,
     flag: flag,
     markDone: markDone,
+    setAssumeOut: setAssumeOut,
+    setBuilding: setBuilding,
+    markBuildingWalked: markBuildingWalked,
+    isEmpty: isEmpty,
+    toggleEmpty: toggleEmpty,
+    emptyCount: emptyCount,
     undo: undo,
     compactorRun: compactorRun,
     closeNight: closeNight,

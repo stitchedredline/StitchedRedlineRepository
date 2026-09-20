@@ -20,8 +20,41 @@ there is.
 | Mode | Who you visit | Use it when |
 |---|---|---|
 | QR only | Doors that scanned the tag | Once residents actually use the tags |
-| Smart | Scans + doors that usually have trash + doors with no history | Day-to-day default |
+| Smart | Everyone except doors proven reliably empty | Day-to-day default |
 | Sweep all | Every door | New buildings, or a night you don't trust the data |
+
+Smart mode only drops a door once it has been empty on at least three quarters
+of the nights it was observed, with at least three nights of data. A hit-or-miss
+door still gets checked — missing real trash costs a complaint, checking one
+extra door costs three seconds.
+
+## Busy nights: call out the empties
+
+On a night when most doors *do* have trash, logging the hits is backwards —
+there are far fewer misses. **Call out empties** mode flips the assumption:
+every door is treated as having trash, and you only record the exceptions.
+
+Tap the mic and say the apartment number. You can rattle off a whole hallway
+in one breath — *"204, 211, 306"* — and it logs all three. Say *"next
+building"* to advance, *"undo"* to take one back. It speaks the number back to
+you so you know it heard right without looking at the screen, and beeps high
+for a hit, low for a miss.
+
+The number pad grid underneath does the same job with a thumb, and always
+works. Use it in a dead stairwell — voice recognition needs signal.
+
+Two things that matter:
+
+- **Tell it which building you're in.** Unit 101 exists in all 19 buildings, so
+  the app matches what you say against the current building only. Hit **Next**
+  when you finish one.
+- **"Next" is what marks a building walked.** Doors you never touched in a
+  walked building get scored as "had trash". A building you never marked walked
+  is left out of the history entirely rather than guessed at.
+
+This is also the fastest way to make the app smart. Two weeks of calling out
+empties builds enough per-door history for Smart mode to start skipping the
+dead doors on its own — no QR adoption required.
 
 **Learns your route.** Close out at the end of each shift and the app records
 what every door did. After about a week it knows that 204 puts trash out most
@@ -38,6 +71,7 @@ bonus; lose signal and nothing stops working.
 
 ```
 index.html      driver screen — the thing you use on shift
+sunday.html     busy-night mode: call out the empties by voice
 out.html        what a resident sees after scanning a tag
 setup.html      one-time route builder + GPS pins + backup
 qr.html         printable QR tags, one per door
@@ -45,6 +79,7 @@ history.html    per-night stats and per-door hit rates
 config.js       your backend URL goes here
 js/route.js     routing, skip logic, prediction, GPS optimizer
 js/store.js     local storage, night state, sync
+js/sunday.js    voice capture, building tracking, empty logging
 backend/Code.gs Google Apps Script backend (free)
 test/           node test/route.test.js
 ```
@@ -98,6 +133,10 @@ time.
   app can re-order the property by shortest walk (nearest-neighbour + 2-opt).
   Useful for setting the order the first time; after that trust your feet.
 - Changing any file? Bump `CACHE` in `sw.js` or phones keep serving the old one.
+- iOS voice quirks: Safari drops the mic when the screen locks, so the app holds
+  a screen wake lock while listening. If voice misbehaves in the home-screen
+  app, run `sunday.html` in Safari proper instead. The number pad never depends
+  on any of that.
 - The Apps Script sheet stores unit IDs and timestamps only — no resident names,
   no phone numbers, nothing personal.
 
@@ -105,4 +144,5 @@ time.
 
 ```
 node test/route.test.js
+node test/store.test.js
 ```

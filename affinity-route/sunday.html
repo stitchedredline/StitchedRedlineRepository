@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Call Out Empties</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Call out empties</h1>
+      <div class="sub">Every door has trash unless you say otherwise</div>
+    </div>
+    <div class="spacer"></div>
+    <a class="btn sec sm" href="index.html">Exit</a>
+  </div>
+
+  <div class="bldgnav">
+    <button class="btn sec" id="bPrev" aria-label="Previous building">◀</button>
+    <div class="bldgnow">
+      <b id="bName">—</b>
+      <span id="bMeta" class="muted"></span>
+    </div>
+    <button class="btn sec" id="bNext" aria-label="Next building">▶</button>
+  </div>
+
+  <div class="card" id="heard">
+    <div class="heardlabel">Last heard</div>
+    <div class="heardbig" id="heardBig">—</div>
+    <div class="muted" id="heardSub">Tap the mic and say the apartment number.</div>
+  </div>
+
+  <button class="mic" id="mic" aria-pressed="false">
+    <span class="dot"></span>
+    <span id="micLabel">Start listening</span>
+  </button>
+
+  <div class="row" style="margin-top:8px">
+    <button class="btn sec" id="btnUndo">Undo last</button>
+    <button class="btn sec" id="btnSound" aria-pressed="true">Voice back: on</button>
+  </div>
+
+  <h2>Or tap the empty doors</h2>
+  <div class="grid" id="grid"></div>
+
+  <div class="card">
+    <b id="tally">0 empties logged</b>
+    <p class="muted">When you finish this building, hit Next — that tells the app you
+      actually walked it, so the doors you never touched count as "had trash".</p>
+    <button class="btn" id="btnFinish">Finish building &amp; go next</button>
+  </div>
+
+  <div class="card">
+    <p class="muted" id="shiftStat"></p>
+    <button class="btn sec" id="btnClose">Close out tonight</button>
+  </div>
+</div>
+
+<script src="js/route.js"></script>
+<script src="js/store.js"></script>
+<script src="js/sunday.js"></script>
+</body>
+</html>

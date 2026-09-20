@@ -71,6 +71,108 @@
     return order.concat(unpinned);
   }
 
+  /* ---------- spoken numbers ---------- */
+
+  var WORDS = {
+    zero:0, oh:0, o:0, nought:0,
+    one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9,
+    ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15,
+    sixteen:16, seventeen:17, eighteen:18, nineteen:19,
+    twenty:20, thirty:30, forty:40, fourty:40, fifty:50,
+    sixty:60, seventy:70, eighty:80, ninety:90,
+    /* things dictation hears instead of digits when you are outside at night */
+    to:2, too:2, for:4, fore:4, ate:8, won:1, free:3, tree:3, nine_:9
+  };
+
+  var COMMANDS = {
+    'next building': 'next', 'next': 'next', 'next bldg': 'next',
+    'undo': 'undo', 'scratch that': 'undo', 'back': 'undo', 'no wait': 'undo',
+    'done': 'done', 'finished': 'done', 'clear': 'clear'
+  };
+
+  function spokenCommand(text) {
+    var t = String(text || '').toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (COMMANDS[t]) return COMMANDS[t];
+    if (/\bnext building\b/.test(t)) return 'next';
+    if (/\bundo\b|\bscratch that\b/.test(t)) return 'undo';
+    return null;
+  }
+
+  /* "two oh four" -> ["204"].  "204 211 and 306" -> ["204","211","306"].
+     Returns every apartment number it can find in one utterance, so you can
+     rattle off a whole hallway in one breath. */
+  function parseSpokenUnits(text) {
+    var tokens = String(text || '').toLowerCase()
+      .replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+
+    var out = [];
+    var run = [];        // numeric pieces of the number being built
+    var pendingHundred = false;
+
+    function flush() {
+      if (!run.length) { pendingHundred = false; return; }
+      var parts = run.slice();
+      /* "twenty three" is 23, not 203 */
+      for (var i = 0; i < parts.length - 1; i++) {
+        if (parts[i] >= 20 && parts[i] <= 90 && parts[i] % 10 === 0 &&
+            parts[i + 1] >= 1 && parts[i + 1] <= 9) {
+          parts.splice(i, 2, parts[i] + parts[i + 1]);
+        }
+      }
+      var s = parts.map(String).join('');
+      if (s.length) out.push(s);
+      run = [];
+      pendingHundred = false;
+    }
+
+    tokens.forEach(function (tok) {
+      if (/^\d+$/.test(tok)) {
+        /* "204 211" is two doors, not one 6-digit number */
+        if (tok.length >= 2 && run.length) flush();
+        run.push(parseInt(tok, 10));
+        return;
+      }
+      if (tok === 'hundred') {
+        /* "one hundred four" -> 1*100 + 4 */
+        if (run.length) {
+          var base = run.pop() * 100;
+          run.push(base);
+          pendingHundred = true;
+        }
+        return;
+      }
+      if (WORDS.hasOwnProperty(tok)) {
+        var v = WORDS[tok];
+        if (pendingHundred && run.length) {
+          run[run.length - 1] += v;
+          pendingHundred = false;
+        } else {
+          run.push(v);
+        }
+        return;
+      }
+      /* any other word ends the current number */
+      flush();
+    });
+    flush();
+    return out;
+  }
+
+  /* Match what you said against real doors. The building you are standing in
+     wins, because 101 exists in every building on the property. */
+  function matchUnits(cfg, spoken, currentBuildingId) {
+    var hits = [];
+    (cfg.buildings || []).forEach(function (b) {
+      (b.units || []).forEach(function (u) {
+        if (String(u.label) === String(spoken)) {
+          hits.push({ unitId: u.id, label: u.label, buildingId: b.id, buildingName: b.name });
+        }
+      });
+    });
+    var here = hits.filter(function (h) { return h.buildingId === currentBuildingId; });
+    return { exact: here.length === 1 ? here[0] : null, all: hits, here: here };
+  }
+
   /* ---------- prediction ---------- */
 
   /* Hit rate = how often this door actually puts trash out.
@@ -116,10 +218,13 @@
         var flag = flags[u.id];
         var h = hist[u.id];
         var conf = confidence(h);
+        /* Smart mode only drops a door that has proven itself reliably empty.
+           A door that is hit-or-miss still gets checked — missing real trash
+           costs a complaint, checking one extra door costs three seconds. */
         var include =
           mode === 'sweep' ? true :
           mode === 'confirmed' ? !!flag :
-          (!!flag || conf === 'likely' || conf === 'new');
+          (!!flag || conf !== 'rare');
 
         if (u.skip) include = false;
         if (!include) { skipped++; return; }
@@ -181,6 +286,9 @@
   }
 
   return {
+    parseSpokenUnits: parseSpokenUnits,
+    spokenCommand: spokenCommand,
+    matchUnits: matchUnits,
     haversine: haversine,
     tourLength: tourLength,
     optimizeOrder: optimizeOrder,

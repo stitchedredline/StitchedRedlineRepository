@@ -1,10 +1,10 @@
 /* Cache-first so the app opens instantly in a dead stairwell.
    Bump CACHE when you change any file, or phones keep the old copy. */
-var CACHE = 'affinity-route-v1';
+var CACHE = 'affinity-route-v2';
 var FILES = [
-  'index.html', 'out.html', 'setup.html', 'qr.html', 'history.html',
+  'index.html', 'out.html', 'sunday.html', 'setup.html', 'qr.html', 'history.html',
   'app.css', 'config.js', 'icon.svg', 'manifest.webmanifest',
-  'js/store.js', 'js/route.js', 'js/app.js', 'js/setup.js', 'js/qr.js'
+  'js/store.js', 'js/route.js', 'js/app.js', 'js/setup.js', 'js/qr.js', 'js/sunday.js'
 ];
 
 self.addEventListener('install', function (e) {
