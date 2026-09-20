@@ -77,6 +77,15 @@
         "right|3": "Cat lady — heavy litter bags."
       },
       "units": []
+    },
+    {
+      "name": "8118",
+      "floors": 3,
+      "sides": [
+        "left",
+        "right"
+      ],
+      "units": []
     }
   ]
 }
