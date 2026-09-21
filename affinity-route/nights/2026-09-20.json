@@ -74,6 +74,10 @@
     {
       "bags": 83,
       "note": "first compactor run, truck full"
+    },
+    {
+      "bags": 49,
+      "note": "second compactor run, truck full. 49 confirmed on the log, plus 5 bags in an unassigned call-out. Run 1 filled the truck at 83 — this one at roughly 49-54, so either bag volume varies a lot or some buildings went into the truck without being called out."
     }
   ],
   "_needsId": "b-tbd-2 is the building walked after the first compactor run — number not called out. Unit 1318 is in it, bottom floor left. Re-key this once the number is known.",
