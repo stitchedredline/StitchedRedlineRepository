@@ -285,6 +285,7 @@
     var pendingBags = null;     // a count spoken before its floor: "four on the top floor"
     var expectFloorNumber = false;
     var sawFloor = false;
+    var awaitingCount = false;  // a floor has been named and still has no count
 
     /* A bare number already in hand, now followed by a floor word, was the bag
        count all along — it gets attached once the floor resolves. */
@@ -296,11 +297,36 @@
       if (!h) return null;
       if (h.kind === 'top') return topFloor || null;
       if (h.kind === 'bottom') return 1;
+      if (h.kind === 'middle') return topFloor ? Math.ceil(topFloor / 2) : null;
       return h.v;
+    }
+
+    function emitFloor(h) {
+      var f = resolve(h);
+      if (f === null) return false;
+      events.push({ type: 'floor', value: f });
+      sawFloor = true;
+      if (pendingBags !== null) {
+        events.push({ type: 'bags', value: pendingBags });
+        awaitingCount = false;
+      } else {
+        awaitingCount = true;
+      }
+      pendingBags = null;
+      return true;
+    }
+
+    /* "Three on the top, two in the middle" — top/bottom/middle name a floor on
+       their own, so they resolve when the phrase moves on instead of waiting for
+       a "floor" that never comes. A bare number cannot do this: it is just as
+       likely to be a bag count. */
+    function flushFloor() {
+      if (held && held.kind !== 'num') { emitFloor(held); held = null; }
     }
 
     tokens.forEach(function (tok) {
       if (tok === 'left' || tok === 'right') {
+        flushFloor();
         events.push({ type: 'side', value: tok });
         return;
       }
@@ -310,6 +336,7 @@
       if (tok === 'bottom' || tok === 'ground' || tok === 'lower' || tok === 'lobby') {
         shelveCount(); held = { kind: 'bottom' }; return;
       }
+      if (tok === 'middle' || tok === 'mid') { shelveCount(); held = { kind: 'middle' }; return; }
 
       if (ORDINALS.hasOwnProperty(tok)) {
         shelveCount();
@@ -319,12 +346,7 @@
 
       if (FLOOR_WORD.hasOwnProperty(tok)) {
         if (held) {
-          var f = resolve(held);
-          if (f !== null) {
-            events.push({ type: 'floor', value: f });
-            sawFloor = true;
-            if (pendingBags !== null) events.push({ type: 'bags', value: pendingBags });
-          }
+          emitFloor(held);
           pendingBags = null;
           held = null;
         } else {
@@ -335,26 +357,30 @@
 
       if (BAG_WORD.hasOwnProperty(tok)) {
         if (held && held.kind === 'num') {
-          events.push({ type: 'bags', value: held.v });
+          /* No floor is waiting for a count, so this one belongs to the floor
+             about to be named: "three bags on the top floor". */
+          if (awaitingCount) {
+            events.push({ type: 'bags', value: held.v });
+            awaitingCount = false;
+          } else {
+            pendingBags = held.v;
+          }
           held = null;
         }
         return;
       }
 
-      if (ZERO_WORD.hasOwnProperty(tok)) {
-        events.push({ type: 'bags', value: 0 });
-        held = null;
-        return;
-      }
-
       var n = null;
-      if (/^\d+$/.test(tok)) n = parseInt(tok, 10);
+      if (ZERO_WORD.hasOwnProperty(tok)) n = 0;
+      else if (/^\d+$/.test(tok)) n = parseInt(tok, 10);
       else if (WORDS.hasOwnProperty(tok)) n = WORDS[tok];
 
       if (n !== null) {
+        flushFloor();
         if (expectFloorNumber) {
           events.push({ type: 'floor', value: n });
           sawFloor = true;
+          awaitingCount = true;
           expectFloorNumber = false;
         } else {
           held = { kind: 'num', v: n };
@@ -370,9 +396,16 @@
       expectFloorNumber = false;
     });
 
+    /* A floor named at the very end still counts: "six on the bottom". */
+    flushFloor();
+
     /* "third floor zero" — a trailing bare number is the bag count. */
     if (held && held.kind === 'num' && sawFloor) {
       events.push({ type: 'bags', value: held.v });
+    }
+    /* "three bags", with no floor named at all, means the floor you are on. */
+    if (pendingBags !== null && !sawFloor) {
+      events.push({ type: 'bags', value: pendingBags });
     }
     return events;
   }

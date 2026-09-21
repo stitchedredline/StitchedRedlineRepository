@@ -169,5 +169,32 @@ ok('the aside never becomes a phantom floor count', stripped.entries.length === 
 ok('the side from the aside call still lands',
    stripped.entries.every(function (e) { return e.side === 'left'; }));
 
+/* ---- "top" and "middle" name a floor without the word "floor" ---- */
+
+var bare = callOut('left side, three on the top, two in the middle, six on the bottom floor', 3);
+ok('a bare "top" still names the top floor',
+   bare.entries[0].floor === 3 && bare.entries[0].bags === 3);
+ok('"the middle" is the middle floor',
+   bare.entries[1].floor === 2 && bare.entries[1].bags === 2);
+ok('a bare floor word does not swallow the rest of the call',
+   bare.entries.length === 3 && bare.entries[2].floor === 1 && bare.entries[2].bags === 6);
+ok('a floor named at the very end still counts',
+   callOut('six on the bottom', 3).entries[0].floor === 1);
+ok('"middle" scales with the building', callOut('two in the middle', 5).entries.length === 0 ||
+   Route.parseFloorCall('two in the middle', 5)
+     .filter(function (e) { return e.type === 'floor'; })[0].value === 3);
+
+/* ---- the count can lead its floor: "three bags on the top floor" ---- */
+
+var bagsFirst = callOut('three bags on the top floor, two bags on the second floor', 3);
+ok('a count spoken before its floor lands on that floor',
+   bagsFirst.entries[0].floor === 3 && bagsFirst.entries[0].bags === 3);
+ok('and the next one does not stick to the previous floor',
+   bagsFirst.entries[1].floor === 2 && bagsFirst.entries[1].bags === 2);
+ok('"zero on the bottom floor" reads as a count, not a floor',
+   callOut('zero on the bottom floor', 3).entries[0].bags === 0);
+ok('a bare count with no floor named lands on the floor you are on',
+   callOut('three bags', 3, { side: 'left', floor: 2 }).entries[0].floor === 2);
+
 console.log(fails ? '\n' + fails + ' FAILED' : '\nall good');
 process.exit(fails ? 1 : 0);

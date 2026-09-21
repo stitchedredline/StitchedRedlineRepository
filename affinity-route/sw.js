@@ -1,6 +1,6 @@
 /* Cache-first so the app opens instantly in a dead stairwell.
    Bump CACHE when you change any file, or phones keep the old copy. */
-var CACHE = 'affinity-route-v7';
+var CACHE = 'affinity-route-v8';
 var FILES = [
   'index.html', 'out.html', 'sunday.html', 'floors.html', 'setup.html', 'qr.html', 'history.html',
   'app.css', 'config.js', 'route.json', 'icon.svg', 'manifest.webmanifest',
