@@ -95,6 +95,15 @@
         "right"
       ],
       "units": []
+    },
+    {
+      "name": "7811",
+      "floors": 3,
+      "sides": [
+        "left",
+        "right"
+      ],
+      "units": []
     }
   ]
 }
