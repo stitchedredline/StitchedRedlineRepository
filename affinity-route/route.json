@@ -198,5 +198,516 @@
     }
   ],
   "_sections": "The property splits into two sides. Section 1 is everything walked before the second compactor run; section 2 is the rest. Dumping at a section boundary beats dumping mid-section even with room left.",
-  "_capacityNote": "Full-truck readings so far: 83, 96. Bag volume varies, so the low end is the safe planning number and the spread is the real story — a 'full' truck is anywhere in that range depending on bag size."
+  "_capacityNote": "Full-truck readings so far: 83, 96. Bag volume varies, so the low end is the safe planning number and the spread is the real story — a 'full' truck is anywhere in that range depending on bag size.",
+  "historySeed": {
+    "id": "2026-09-20",
+    "_note": "One night of real counts, so a fresh install starts knowing the route instead of blank. Applied once, tracked by id, so reloading the route never double-counts it.",
+    "floors": {
+      "b-2202|left|3": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-2202|left|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-2202|left|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-2202|right|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-2202|right|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-2202|right|1": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-2206|left|3": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-2206|left|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-2206|left|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-2206|right|3": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-2206|right|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-2206|right|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-2212|left|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-2212|left|2": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-2212|left|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-2212|right|3": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-2212|right|2": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-2212|right|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-2215|single|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-2215|single|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-2215|single|1": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      },
+      "b-8102|left|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8102|left|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8102|left|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-8102|right|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8102|right|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8102|right|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-no-number-1|left|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-no-number-1|left|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-no-number-1|left|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-no-number-1|right|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-no-number-1|right|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-no-number-1|right|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-tbd-2|left|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-tbd-2|left|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-tbd-2|left|1": {
+        "nights": 1,
+        "bags": 6,
+        "empties": 0
+      },
+      "b-tbd-2|right|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-tbd-2|right|2": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-tbd-2|right|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-8118|left|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8118|left|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8118|left|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8118|right|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8118|right|2": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-8118|right|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-7800|right|3": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7800|right|2": {
+        "nights": 1,
+        "bags": 6,
+        "empties": 0
+      },
+      "b-7800|right|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7800|left|3": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-7800|left|2": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      },
+      "b-7800|left|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-7811|right|3": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-7811|right|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7811|right|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-7902|left|3": {
+        "nights": 1,
+        "bags": 7,
+        "empties": 0
+      },
+      "b-7902|left|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7902|left|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7902|right|3": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-7902|right|2": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-7902|right|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-7903|right|3": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7903|right|2": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-7903|right|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-7903|left|3": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-7903|left|2": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-7903|left|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7904|right|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-7904|right|2": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-7904|right|1": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-7904|left|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-7904|left|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7904|left|1": {
+        "nights": 1,
+        "bags": 7,
+        "empties": 0
+      },
+      "b-7908|left|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-7908|left|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-7908|left|1": {
+        "nights": 1,
+        "bags": 6,
+        "empties": 0
+      },
+      "b-7908|right|3": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-7908|right|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-7908|right|1": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8001|right|3": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-8001|right|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-8001|right|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-8001|left|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8001|left|2": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-8001|left|1": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-8021|left|3": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-8021|left|2": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-8021|left|1": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      },
+      "b-8021|right|2": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-8021|right|1": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      },
+      "b-8015|left|3": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      },
+      "b-8015|left|2": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      },
+      "b-8015|left|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-8015|right|3": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-8015|right|2": {
+        "nights": 1,
+        "bags": 4,
+        "empties": 0
+      },
+      "b-8015|right|1": {
+        "nights": 1,
+        "bags": 0,
+        "empties": 1
+      },
+      "b-8010|left|3": {
+        "nights": 1,
+        "bags": 5,
+        "empties": 0
+      },
+      "b-8010|left|2": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8010|left|1": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      },
+      "b-8010|right|3": {
+        "nights": 1,
+        "bags": 3,
+        "empties": 0
+      },
+      "b-8010|right|2": {
+        "nights": 1,
+        "bags": 2,
+        "empties": 0
+      },
+      "b-8010|right|1": {
+        "nights": 1,
+        "bags": 1,
+        "empties": 0
+      }
+    }
+  }
 }

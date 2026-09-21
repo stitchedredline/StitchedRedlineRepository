@@ -175,5 +175,20 @@
   "sectionsWalked": [
     1,
     2
+  ],
+  "closed": true,
+  "totals": {
+    "bags": 265,
+    "buildings": 18,
+    "stairwellFloors": 101,
+    "dumped": 228,
+    "stillOnTruck": 37
+  },
+  "openQuestions": [
+    "8021 right top floor: called as 'three on the top, four' — never resolved, so it is not counted.",
+    "One left-side call-out of 0/4/1 (5 bags) was never matched to a building.",
+    "'TBD 2' is the building holding unit 1318 and the cat lady; real number unknown.",
+    "'No Number 1' in section 1 still needs a landmark to identify it.",
+    "1028 was never called out tonight, so its hot sheet was never read."
   ]
 }

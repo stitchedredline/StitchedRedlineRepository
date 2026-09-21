@@ -141,6 +141,19 @@ Store.importRoute([
 ]);
 noteB = Store.cfg.buildings[0];
 
+/* A night of counts ships with the route so a new phone is not starting blank,
+   but reloading the route must not keep adding the same night to the average. */
+Store.cfg.floorHistory = {};
+Store.cfg.historySeeds = {};
+var seed = { id: 'n1', floors: { 'b-x|left|3': { nights: 1, bags: 4, empties: 0 },
+                                 'b-x|left|1': { nights: 1, bags: 0, empties: 1 } } };
+ok('the seed lands on a fresh install', Store.applyHistorySeed(seed) === 2);
+ok('it carries the bag count', Store.cfg.floorHistory['b-x|left|3'].bags === 4);
+ok('it carries an empty floor', Store.cfg.floorHistory['b-x|left|1'].empties === 1);
+ok('re-applying the same seed is a no-op', Store.applyHistorySeed(seed) === 0);
+ok('and does not inflate the night count',
+   Store.cfg.floorHistory['b-x|left|3'].nights === 1);
+
 /* Doors over the posted limit are the record a notice gets written from. */
 var rec = Store.logOverLimit(noteB.id, 'left', 1, '1318', 6);
 ok('an over-limit door is logged with its count', rec.unit === '1318' && rec.bags === 6);

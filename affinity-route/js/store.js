@@ -151,8 +151,32 @@ var Store = (function () {
         if (data.bagLimitPerUnit) cfg.bagLimitPerUnit = data.bagLimitPerUnit;
         if (!data.buildings || !data.buildings.length) throw new Error('route.json has no buildings');
         var n = importRoute(data.buildings);
-        return { buildings: n, doors: allUnits().length };
+        var seeded = applyHistorySeed(data.historySeed);
+        return { buildings: n, doors: allUnits().length, seeded: seeded };
       });
+  }
+
+  /* A night of real counts shipped with the route, so a fresh phone starts
+     knowing which floors are dead weight instead of learning from zero. Keyed
+     by id and recorded once, because reloading the route is routine and must
+     never inflate the night counts it is averaged against. */
+  function applyHistorySeed(seed) {
+    if (!seed || !seed.id || !seed.floors) return 0;
+    var done = cfg.historySeeds || (cfg.historySeeds = {});
+    if (done[seed.id]) return 0;
+    var fh = cfg.floorHistory || (cfg.floorHistory = {});
+    var n = 0;
+    Object.keys(seed.floors).forEach(function (k) {
+      var s = seed.floors[k];
+      var rec = fh[k] || (fh[k] = { nights: 0, bags: 0, empties: 0 });
+      rec.nights += s.nights || 0;
+      rec.bags += s.bags || 0;
+      rec.empties += s.empties || 0;
+      n++;
+    });
+    done[seed.id] = Date.now();
+    saveCfg();
+    return n;
   }
 
   function addBuilding(name) {
@@ -513,6 +537,7 @@ var Store = (function () {
     parseRouteText: parseRouteText,
     importRoute: importRoute,
     loadSeed: loadSeed,
+    applyHistorySeed: applyHistorySeed,
     buildingIdFor: buildingIdFor,
     setUnits: setUnits,
     reorderBuildings: reorderBuildings,
