@@ -52,8 +52,8 @@
     "b-7800|right|2": 5,
     "b-7800|right|1": 2,
     "b-7800|left|3": 0,
-    "b-7800|left|2": 4,
-    "b-7800|left|1": 1,
+    "b-7800|left|2": 1,
+    "b-7800|left|1": 3,
     "b-7811|right|3": 0,
     "b-7811|right|2": 2,
     "b-7811|right|1": 0
@@ -90,5 +90,27 @@
   ],
   "floorNotes": {
     "b-tbd-2|right|3": "Cat lady — top floor right."
-  }
+  },
+  "unassigned": [
+    {
+      "side": "right",
+      "floors": {
+        "3": 2,
+        "2": 6,
+        "1": 2
+      },
+      "bags": 10,
+      "heard": "called out right after 7811's right side, no building named"
+    },
+    {
+      "side": "left",
+      "floors": {
+        "3": 0,
+        "2": 4,
+        "1": 1
+      },
+      "bags": 5,
+      "heard": "logged as 7800 left earlier; 7800 left was then called out again as 0/1/3, so this set belongs to some other building"
+    }
+  ]
 }
