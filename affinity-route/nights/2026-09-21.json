@@ -1,0 +1,15 @@
+{
+  "night": "2026-09-21",
+  "property": "affinity1",
+  "source": "side totals called out at end of shift",
+  "granularity": "sides only — no per-floor counts this night, by choice",
+  "sideTotals": {
+    "left": 103,
+    "right": 102
+  },
+  "totals": {
+    "bags": 205
+  },
+  "closed": true,
+  "_note": "Monday baseline. Sunday 2026-09-20 was 265, so a Monday runs about 77% of a Sunday. Still three compactor loads at the observed 83-96 range, not two."
+}
