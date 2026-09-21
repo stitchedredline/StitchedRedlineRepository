@@ -115,6 +115,17 @@
       ],
       "units": [],
       "section": 1
+    },
+    {
+      "name": "TBD 3",
+      "_note": "first building walked in section 2, after the second compactor run. Number not called out — rename to the real number and the history follows.",
+      "floors": 3,
+      "sides": [
+        "left",
+        "right"
+      ],
+      "units": [],
+      "section": 2
     }
   ],
   "_sections": "The property splits into two sides. Section 1 is everything walked before the second compactor run; section 2 is the rest. Dumping at a section boundary beats dumping mid-section even with room left.",
