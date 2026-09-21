@@ -165,6 +165,16 @@
       ],
       "units": [],
       "section": 2
+    },
+    {
+      "name": "8021",
+      "floors": 3,
+      "sides": [
+        "left",
+        "right"
+      ],
+      "units": [],
+      "section": 2
     }
   ],
   "_sections": "The property splits into two sides. Section 1 is everything walked before the second compactor run; section 2 is the rest. Dumping at a section boundary beats dumping mid-section even with room left.",
