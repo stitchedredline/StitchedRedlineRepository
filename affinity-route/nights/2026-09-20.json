@@ -117,6 +117,12 @@
       "section": 1,
       "full": false,
       "note": "planned stop at the end of section 1, not a full truck — room was left. Bag volume varies, so a bag count is only a rough gauge of the load. Run 1 (83) is the only observed full truck."
+    },
+    {
+      "bags": 96,
+      "section": 2,
+      "full": true,
+      "note": "third compactor run, truck full. Second genuine full-truck reading of the night after 83."
     }
   ],
   "_needsId": "b-tbd-2 is the building walked after the first compactor run — number not called out. Unit 1318 is in it, bottom floor left. Re-key this once the number is known.",

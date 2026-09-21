@@ -168,5 +168,5 @@
     }
   ],
   "_sections": "The property splits into two sides. Section 1 is everything walked before the second compactor run; section 2 is the rest. Dumping at a section boundary beats dumping mid-section even with room left.",
-  "_capacityNote": "83 bags filled the truck once. Bag volume varies a lot, so treat it as a rough gauge, not a rule."
+  "_capacityNote": "Full-truck readings so far: 83, 96. Bag volume varies, so the low end is the safe planning number and the spread is the real story — a 'full' truck is anywhere in that range depending on bag size."
 }
