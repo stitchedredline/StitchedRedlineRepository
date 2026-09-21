@@ -49,7 +49,7 @@
     "b-8118|right|2": 5,
     "b-8118|right|1": 0,
     "b-7800|right|3": 2,
-    "b-7800|right|2": 5,
+    "b-7800|right|2": 6,
     "b-7800|right|1": 2,
     "b-7800|left|3": 0,
     "b-7800|left|2": 1,
@@ -92,16 +92,6 @@
     "b-tbd-2|right|3": "Cat lady — top floor right."
   },
   "unassigned": [
-    {
-      "side": "right",
-      "floors": {
-        "3": 2,
-        "2": 6,
-        "1": 2
-      },
-      "bags": 10,
-      "heard": "called out right after 7811's right side, no building named"
-    },
     {
       "side": "left",
       "floors": {
