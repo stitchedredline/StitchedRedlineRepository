@@ -301,11 +301,18 @@
     var total = Store.totalFloorBags();
     $('tally').textContent = bb.bags + ' bags in ' + b.name + ' · ' + total + ' tonight';
 
+    /* Bag volume varies enough that a count is only a rough gauge. The rule
+       that actually holds is to dump at the end of a section rather than
+       mid-section, so the boundary wins over the arithmetic. */
     var carried = Store.night.bags + bb.bags;
     var room = cfg.bagCapacity - carried;
-    $('advice').textContent = room > 2
-      ? 'Room for about ' + room + ' more before a compactor run.'
-      : 'That is a full load — dump before the next building.';
+    var next = buildings[idx + 1];
+    var lastOfSection = b.section && next && next.section && next.section !== b.section;
+    $('advice').textContent = lastOfSection
+      ? 'Last building in section ' + b.section + '. Dump here before crossing over.'
+      : (!next ? 'Last building on the route.'
+        : room > 2 ? 'Room for roughly ' + room + ' more, give or take bag size.'
+        : 'That is a full load — dump before the next building.');
 
     var flagged = Store.overLimitList();
     $('overList').innerHTML = flagged.length

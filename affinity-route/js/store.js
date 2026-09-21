@@ -123,6 +123,7 @@ var Store = (function () {
         order: i + 1,
         floors: b.floors || null,
         sides: (b.sides && b.sides.length) ? b.sides.slice() : null,
+        section: b.section || null,
         note: b.note || '',
         floorNotes: Object.assign({}, b.floorNotes || {}),
         pin: (cfg.buildings.filter(function (old) { return old.id === id; })[0] || {}).pin || null,

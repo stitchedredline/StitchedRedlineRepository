@@ -12,7 +12,8 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "2206",
@@ -21,7 +22,8 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "2212",
@@ -30,7 +32,8 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "2215",
@@ -38,7 +41,8 @@
       "sides": [
         "single"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "8102",
@@ -47,7 +51,8 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "No Number 1",
@@ -57,13 +62,15 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "1028",
       "note": "Hot sheet at 1028 — read it before you walk the building.",
       "_note": "floors and sides not confirmed yet; defaults to 3 floors, left and right. Walking order may need moving.",
-      "units": []
+      "units": [],
+      "section": 2
     },
     {
       "name": "TBD 2",
@@ -76,7 +83,8 @@
       "floorNotes": {
         "right|3": "Cat lady — heavy litter bags."
       },
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "8118",
@@ -85,7 +93,8 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "7800",
@@ -94,7 +103,8 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     },
     {
       "name": "7811",
@@ -103,7 +113,10 @@
         "left",
         "right"
       ],
-      "units": []
+      "units": [],
+      "section": 1
     }
-  ]
+  ],
+  "_sections": "The property splits into two sides. Section 1 is everything walked before the second compactor run; section 2 is the rest. Dumping at a section boundary beats dumping mid-section even with room left.",
+  "_capacityNote": "83 bags filled the truck once. Bag volume varies a lot, so treat it as a rough gauge, not a rule."
 }

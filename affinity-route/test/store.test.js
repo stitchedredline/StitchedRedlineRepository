@@ -131,6 +131,16 @@ Store.setFloorNote(noteB.id, 'left', 1, 'Blocked door.');
 ok('a floor note can be set on the route',
    Store.floorNote(Store.cfg.buildings[0], 'left', 1) === 'Blocked door.');
 
+ok('a section survives the import',
+   Store.importRoute([{ name: 'A', section: 1, units: [] },
+                      { name: 'B', section: 2, units: [] }]) === 2 &&
+   Store.cfg.buildings[0].section === 1 && Store.cfg.buildings[1].section === 2);
+Store.importRoute([
+  { name: '1318 Test', floors: 3, sides: ['left', 'right'],
+    floorNotes: { 'right|3': 'Cat lady.' }, units: [] }
+]);
+noteB = Store.cfg.buildings[0];
+
 /* Doors over the posted limit are the record a notice gets written from. */
 var rec = Store.logOverLimit(noteB.id, 'left', 1, '1318', 6);
 ok('an over-limit door is logged with its count', rec.unit === '1318' && rec.bags === 6);
