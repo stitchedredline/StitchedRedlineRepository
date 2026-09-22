@@ -1,0 +1,15 @@
+{
+  "night": "2026-09-22",
+  "property": "affinity1",
+  "source": "called out live, bare format: side then three counts top-down",
+  "routeOrder": ["b-2202","b-2206","b-2212","b-2215","b-8102","b-no-number-1","b-tbd-2","b-8118","b-7800","b-7811","b-7902","b-7903","b-7904","b-7908","b-8001","b-8021","b-8015","b-8010"],
+  "floorBags": {
+    "b-2202|left|3": 0,
+    "b-2202|left|2": 1,
+    "b-2202|left|1": 2,
+    "b-2202|right|3": 0,
+    "b-2202|right|2": 0,
+    "b-2202|right|1": 0
+  },
+  "walked": ["b-2202"]
+}
