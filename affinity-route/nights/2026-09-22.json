@@ -105,5 +105,12 @@
   "totals": {
     "bags": 83,
     "buildings": 11
-  }
+  },
+  "skippedForNight": [
+    {
+      "building": "b-8015",
+      "reason": "Lowest bag volume of the remaining four (tied with 8021, but 8021 has a likely-higher unresolved count from Sunday). Deferred to prioritize 8001/8010/8021 finish.",
+      "deferredTo": "next shift"
+    }
+  ]
 }
