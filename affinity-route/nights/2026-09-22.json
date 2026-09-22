@@ -63,7 +63,22 @@
     "b-7903|right|1": 0,
     "b-7903|left|3": 2,
     "b-7903|left|2": 1,
-    "b-7903|left|1": 2
+    "b-7903|left|1": 2,
+    "b-7904|left|3": 2,
+    "b-7904|left|2": 1,
+    "b-7904|left|1": 2,
+    "b-7904|right|3": 1,
+    "b-7904|right|2": 0,
+    "b-7904|right|1": 2,
+    "b-7908|right|3": 0,
+    "b-7908|right|2": 0,
+    "b-7908|right|1": 1,
+    "b-7908|left|3": 0,
+    "b-7908|left|2": 0,
+    "b-7908|left|1": 0,
+    "b-8021|right|3": 2,
+    "b-8021|right|2": 0,
+    "b-8021|right|1": 1
   },
   "walked": [
     "b-2202",
@@ -76,7 +91,10 @@
     "b-7800",
     "b-7811",
     "b-7902",
-    "b-7903"
+    "b-7903",
+    "b-7904",
+    "b-7908",
+    "b-8021"
   ],
   "overLimit": [
     {
@@ -103,8 +121,8 @@
     "8114 right was initially logged 2/2/0 then corrected to 1/1/0 \u2014 corrected value is in this file."
   ],
   "totals": {
-    "bags": 83,
-    "buildings": 11
+    "bags": 95,
+    "buildings": 14
   },
   "skippedForNight": [
     {
